@@ -4,10 +4,12 @@ import (
 	"time"
 	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
-	"os"
 	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"os"
 	"reflect"
 	"fmt"
+	"log"
 )
 
 func main() {
@@ -24,8 +26,20 @@ func main() {
 		select {
 		case evt := <-received:
 			fmt.Printf("got event %T: %s\n", evt, evt)
+			handleEvent(evt)
 		case err = <- errors:
 			fmt.Printf("got error while receiving event: %s\n", err)
 		}
+	}
+}
+
+func handleEvent(event msgqueue.Event) {
+	switch e := event.(type) {
+	case *events.EventCreatedEvent:
+		log.Printf("event %s created: %s", e.ID, e)
+	case *events.LocationCreatedEvent:
+		log.Printf("location %s created: %s", e.ID, e)
+	default:
+		log.Printf("unknown event type: %T", e)
 	}
 }
