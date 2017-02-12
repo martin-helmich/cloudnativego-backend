@@ -10,20 +10,25 @@ import (
 
 const eventNameHeader = "x-event-name";
 
-type AMQPEventListener struct {
+type amqpEventListener struct {
 	channel  *amqp.Channel
 	exchange string
 	queue    string
 	typeMap  map[string]reflect.Type
 }
 
-func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) (*AMQPEventListener, error) {
+// NewAMQPEventListener creates a new event listener.
+// It will need an AMQP connection passed as parameter and use this connection
+// to create its own channel (note: AMQP channels are not thread-safe, so just
+// accepting the connection as a parameter and then creating our own private
+// channel is the safest way to ensure this).
+func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) (*amqpEventListener, error) {
 	channel, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("could not create AMQP channel: %s", err)
 	}
 
-	listener := AMQPEventListener{
+	listener := amqpEventListener{
 		channel: channel,
 		exchange: exchange,
 		queue: queue,
@@ -38,7 +43,12 @@ func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) 
 	return &listener, nil
 }
 
-func (l *AMQPEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event, <-chan error, error) {
+// Listen configures the event listener to listen for a set of events that are
+// specified by name as parameter.
+// This method will return two channels: One will contain successfully decoded
+// events, the other will contain errors for messages that could not be
+// successfully decoded.
+func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event, <-chan error, error) {
 	_, err := l.channel.QueueDeclare(l.queue, true, false, false, false, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not declare queue %s: %s", l.queue, err)
@@ -107,6 +117,7 @@ func (l *AMQPEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 	return events, errors, nil
 }
 
-func (l *AMQPEventListener) Map(eventName string, typ reflect.Type) {
+// Map registers event names that should be mapped to certain types.
+func (l *amqpEventListener) Map(eventName string, typ reflect.Type) {
 	l.typeMap[eventName] = typ
 }
