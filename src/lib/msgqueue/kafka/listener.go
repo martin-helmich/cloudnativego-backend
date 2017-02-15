@@ -6,6 +6,10 @@ import (
 	"log"
 	"reflect"
 	"fmt"
+	"os"
+	"strings"
+	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
+	"time"
 )
 
 type kafkaEventListener struct {
@@ -15,14 +19,35 @@ type kafkaEventListener struct {
 	mapper     *msgqueue.EventMapper
 }
 
-func NewKafkaEventListener(client sarama.Client, topic string, partitions []int32) (msgqueue.EventListener, error) {
+func NewKafkaEventListenerFromEnvironment() (msgqueue.EventListener, error) {
+	brokers := []string{"localhost:9092"}
+	partitions := []int32{}
+
+	if brokerList := os.Getenv("KAFKA_BROKERS"); brokerList != "" {
+		brokers = strings.Split(brokerList, ",")
+	}
+
+	if partitionList := os.Getenv("KAFKA_PARTITIONS"); partitionList != "" {
+		partitionStrings := strings.Split(partitionList, ",")
+		partitions = make([]int32, len(partitionStrings))
+
+		for i := range partitionStrings {
+			partitions[i] = partitionStrings[i]
+		}
+	}
+
+	client := <- kafka.RetryConnect(brokers, 5 * time.Second)
+
+	return NewKafkaEventListener(client, partitions)
+}
+
+func NewKafkaEventListener(client sarama.Client, partitions []int32) (msgqueue.EventListener, error) {
 	consumer, err := sarama.NewConsumerFromClient(client)
 	if err != nil {
 		return nil, err
 	}
 
 	listener := &kafkaEventListener{
-		topic: topic,
 		consumer: consumer,
 		partitions: partitions,
 		mapper: msgqueue.NewEventMapper(),

@@ -17,21 +17,19 @@ import (
 
 func main() {
 	var listener msgqueue.EventListener
+	var err error
 
 	if url := os.Getenv("AMQP_URL"); url != "" {
 		log.Printf("connecting to AMQP broker at %s", url)
 
-		conn := <- amqp.RetryConnect(url, 5 * time.Second)
-		listener, _ = evtamqp.NewAMQPEventListener(conn, "example", "queue")
-	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
-		log.Printf("connecting to Kafka brokers at %s", brokers)
-
-		brokers := strings.Split(brokers, ",")
-		client, err := sarama.NewClient(brokers, sarama.NewConfig())
+		listener, err = evtamqp.NewAMQPEventListenerFromEnvironment()
 		if err != nil {
 			panic(err)
 		}
-		listener, err = kafka.NewKafkaEventListener(client, "", []int32{})
+	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
+		log.Printf("connecting to Kafka brokers at %s", brokers)
+
+		listener, err = kafka.NewKafkaEventListenerFromEnvironment()
 		if err != nil {
 			panic(err)
 		}

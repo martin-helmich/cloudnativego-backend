@@ -3,8 +3,11 @@ package amqp
 import (
 	"github.com/streadway/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"encoding/json"
 	"fmt"
+	"os"
+	"time"
 )
 
 type amqpEventEmitter struct {
@@ -16,6 +19,29 @@ type amqpEventEmitter struct {
 type emittedEvent struct {
 	event     msgqueue.Event
 	errorChan chan error
+}
+
+// NewAMQPEventEmitterFromEnvironment will create a new event emitter from
+// the configured environment variables. Important variables are:
+//
+//   - AMQP_URL; the URL of the AMQP broker to connect to
+//   - AMQP_EXCHANGE; the name of the exchange to bind to
+//
+// For missing environment variables, this function will assume sane defaults.
+func NewAMQPEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
+	var url string
+	var exchange string
+
+	if url = os.Getenv("AMQP_URL"); url == "" {
+		url = "amqp://localhost:5672"
+	}
+
+	if exchange = os.Getenv("AMQP_EXCHANGE"); exchange == "" {
+		exchange = "example"
+	}
+
+	conn := <- amqphelper.RetryConnect(url, 5 * time.Second)
+	return NewAMQPEventEmitter(conn, exchange)
 }
 
 // NewAMQPEventEmitter creates a new event emitter.

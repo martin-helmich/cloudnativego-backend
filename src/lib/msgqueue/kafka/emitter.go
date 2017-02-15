@@ -5,10 +5,25 @@ import (
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"encoding/json"
 	"log"
+	"os"
+	"strings"
+	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
+	"time"
 )
 
 type kafkaEventEmitter struct {
 	producer sarama.AsyncProducer
+}
+
+func NewKafkaEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
+	brokers := []string{"localhost:9092"}
+
+	if brokerList := os.Getenv("KAFKA_BROKERS"); brokerList != "" {
+		brokers = strings.Split(brokerList, ",")
+	}
+
+	client := <- kafka.RetryConnect(brokers, 5 * time.Second)
+	return NewKafkaEventEmitter(client)
 }
 
 func NewKafkaEventEmitter(client sarama.Client) (msgqueue.EventEmitter, error) {
@@ -47,18 +62,4 @@ func (k *kafkaEventEmitter) Emit(evt msgqueue.Event) error {
 	success := <- k.producer.Successes()
 	log.Printf("message successfully published: %v", success)
 	return nil
-
-	/*
-	select {
-	//case k.producer.Input() <- msg:
-	//	log.Printf("published message with topic %s: %v", evt.EventName(), jsonBody)
-	case success := <- k.producer.Successes():
-		log.Printf("message successfully published: %v", success)
-		return nil
-	case err := <- k.producer.Errors():
-		return err
-	}
-
-	return nil
-	*/
 }
