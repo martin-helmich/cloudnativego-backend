@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"reflect"
-	"encoding/json"
 )
 
 const eventNameHeader = "x-event-name";
@@ -14,7 +13,7 @@ type amqpEventListener struct {
 	channel  *amqp.Channel
 	exchange string
 	queue    string
-	typeMap  map[string]reflect.Type
+	mapper   *msgqueue.EventMapper
 }
 
 // NewAMQPEventListener creates a new event listener.
@@ -32,7 +31,7 @@ func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) 
 		channel: channel,
 		exchange: exchange,
 		queue: queue,
-		typeMap: make(map[string]reflect.Type),
+		mapper: msgqueue.NewEventMapper(),
 	}
 
 	err = channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
@@ -85,24 +84,7 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 				return
 			}
 
-			typ, ok := l.typeMap[eventName]
-			if !ok {
-				errors <- fmt.Errorf("no mapping configured for event %s", eventName)
-				msg.Nack(false, false)
-				return
-			}
-
-			instance := reflect.New(typ)
-			iface := instance.Interface()
-
-			event, ok := iface.(msgqueue.Event)
-			if !ok {
-				errors <- fmt.Errorf("type %T does not implement the Event interface", iface)
-				msg.Nack(false, false)
-				return
-			}
-
-			err := json.Unmarshal(msg.Body, event)
+			event, err := l.mapper.MapEvent(eventName, msg.Body)
 			if err != nil {
 				errors <- fmt.Errorf("could not unmarshal event %s: %s", eventName, err)
 				msg.Nack(false, false)
@@ -118,6 +100,6 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 }
 
 // Map registers event names that should be mapped to certain types.
-func (l *amqpEventListener) Map(eventName string, typ reflect.Type) {
-	l.typeMap[eventName] = typ
+func (l *amqpEventListener) Map(typ reflect.Type) {
+	l.mapper.RegisterMapping(typ)
 }

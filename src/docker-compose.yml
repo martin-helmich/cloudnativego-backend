@@ -1,11 +1,14 @@
 version: "3"
 services:
-  rmq:
-    image: rabbitmq:3-management
-    ports:
-      - 15672:15672
-    logging:
-      driver: none
+  #rmq:
+  #  image: rabbitmq:3-management
+  #  ports:
+  #    - 15672:15672
+  #  logging:
+  #    driver: none
+
+  kafka:
+    image: spotify/kafka
 
   events:
     image: golang:1.7
@@ -13,7 +16,8 @@ services:
       - ${GOPATH}/src/:/app/src
     environment:
       - GOPATH=/app
-      - AMQP_URL=amqp://rmq:5672/
+      #- AMQP_URL=amqp://rmq:5672/
+      - KAFKA_BROKERS=kafka:9092
     working_dir: /app/src/bitbucket.org/minamartinteam/myevents/src/eventservice
     command: go run main.go
 
@@ -23,6 +27,7 @@ services:
       - ${GOPATH}/src/:/app/src
     environment:
       - GOPATH=/app
-      - AMQP_URL=amqp://rmq:5672/
+      #- AMQP_URL=amqp://rmq:5672/
+      - KAFKA_BROKERS=kafka:9092
     working_dir: /app/src/bitbucket.org/minamartinteam/myevents/src/bookingservice
     command: go run main.go

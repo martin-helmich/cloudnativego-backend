@@ -10,18 +10,44 @@ import (
 	"reflect"
 	"fmt"
 	"log"
+	"strings"
+	"github.com/Shopify/sarama"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 )
 
 func main() {
-	conn := <- amqp.RetryConnect(os.Getenv("AMQP_URL"), 5 * time.Second)
+	var listener msgqueue.EventListener
 
-	listener, err := evtamqp.NewAMQPEventListener(conn, "example", "queue")
+	if url := os.Getenv("AMQP_URL"); url != "" {
+		log.Printf("connecting to AMQP broker at %s", url)
+
+		conn := <- amqp.RetryConnect(url, 5 * time.Second)
+		listener, _ = evtamqp.NewAMQPEventListener(conn, "example", "queue")
+	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
+		log.Printf("connecting to Kafka brokers at %s", brokers)
+
+		brokers := strings.Split(brokers, ",")
+		client, err := sarama.NewClient(brokers, sarama.NewConfig())
+		if err != nil {
+			panic(err)
+		}
+		listener, err = kafka.NewKafkaEventListener(client, "", []int32{})
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		panic("Neither AMQP_URL nor KAFKA_BROKERS specified")
+	}
+
+	log.Println("listening or events")
+
+	listener.Map(reflect.TypeOf(events.EventCreatedEvent{}))
+	received, errors, err := listener.Listen("eventCreated")
+
 	if err != nil {
 		panic(err)
 	}
 
-	listener.Map("eventCreated", reflect.TypeOf(events.EventCreatedEvent{}))
-	received, errors, err := listener.Listen("eventCreated")
 	for {
 		select {
 		case evt := <-received:
