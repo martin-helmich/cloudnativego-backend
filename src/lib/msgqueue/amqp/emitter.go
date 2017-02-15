@@ -1,11 +1,11 @@
 package amqp
 
 import (
-	"github.com/streadway/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"encoding/json"
 	"fmt"
+	"github.com/streadway/amqp"
 	"os"
 	"time"
 )
@@ -40,7 +40,7 @@ func NewAMQPEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
 		exchange = "example"
 	}
 
-	conn := <- amqphelper.RetryConnect(url, 5 * time.Second)
+	conn := <-amqphelper.RetryConnect(url, 5*time.Second)
 	return NewAMQPEventEmitter(conn, exchange)
 }
 
@@ -56,9 +56,9 @@ func NewAMQPEventEmitter(conn *amqp.Connection, exchange string) (msgqueue.Event
 	}
 
 	emitter := amqpEventEmitter{
-		channel: channel,
+		channel:  channel,
 		exchange: exchange,
-		events: make(chan *emittedEvent),
+		events:   make(chan *emittedEvent),
 	}
 
 	// Normally, all(many) of these options should be configurable.
@@ -96,7 +96,7 @@ func (e *amqpEventEmitter) emitItem(item *emittedEvent) {
 			"x-event-name": item.event.EventName(),
 		},
 		ContentType: "application/json",
-		Body: jsonBody,
+		Body:        jsonBody,
 	}
 
 	err = e.channel.Publish(e.exchange, item.event.EventName(), false, false, pub)
@@ -108,7 +108,7 @@ func (e *amqpEventEmitter) emitItem(item *emittedEvent) {
 func (e *amqpEventEmitter) Emit(event msgqueue.Event) error {
 	errChan := make(chan error)
 	item := &emittedEvent{
-		event: event,
+		event:     event,
 		errorChan: errChan,
 	}
 

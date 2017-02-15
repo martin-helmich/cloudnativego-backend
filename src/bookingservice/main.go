@@ -1,18 +1,18 @@
 package main
 
 import (
-	"time"
-	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
+	"fmt"
+	"github.com/Shopify/sarama"
+	"log"
 	"os"
 	"reflect"
-	"fmt"
-	"log"
 	"strings"
-	"github.com/Shopify/sarama"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
+	"time"
 )
 
 func main() {
@@ -51,7 +51,7 @@ func main() {
 		case evt := <-received:
 			fmt.Printf("got event %T: %s\n", evt, evt)
 			handleEvent(evt)
-		case err = <- errors:
+		case err = <-errors:
 			fmt.Printf("got error while receiving event: %s\n", err)
 		}
 	}

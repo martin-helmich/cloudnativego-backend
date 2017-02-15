@@ -2,8 +2,8 @@ package amqp
 
 import (
 	"github.com/streadway/amqp"
-	"time"
 	"log"
+	"time"
 )
 
 // RetryConnect implements a retry mechanism for establishing the AMQP connection.
@@ -18,7 +18,7 @@ import (
 //
 // [1] http://stackoverflow.com/q/25503412/1995300
 // [1] https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
-func RetryConnect(amqpURL string, retryInterval time.Duration) (chan *amqp.Connection) {
+func RetryConnect(amqpURL string, retryInterval time.Duration) chan *amqp.Connection {
 	result := make(chan *amqp.Connection)
 
 	go func() {

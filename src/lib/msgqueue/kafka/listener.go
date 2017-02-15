@@ -1,14 +1,14 @@
 package kafka
 
 import (
-	"github.com/Shopify/sarama"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	"log"
-	"reflect"
-	"fmt"
-	"os"
-	"strings"
 	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"fmt"
+	"github.com/Shopify/sarama"
+	"log"
+	"os"
+	"reflect"
+	"strings"
 	"time"
 )
 
@@ -36,7 +36,7 @@ func NewKafkaEventListenerFromEnvironment() (msgqueue.EventListener, error) {
 		}
 	}
 
-	client := <- kafka.RetryConnect(brokers, 5 * time.Second)
+	client := <-kafka.RetryConnect(brokers, 5*time.Second)
 
 	return NewKafkaEventListener(client, partitions)
 }
@@ -48,9 +48,9 @@ func NewKafkaEventListener(client sarama.Client, partitions []int32) (msgqueue.E
 	}
 
 	listener := &kafkaEventListener{
-		consumer: consumer,
+		consumer:   consumer,
 		partitions: partitions,
-		mapper: msgqueue.NewEventMapper(),
+		mapper:     msgqueue.NewEventMapper(),
 	}
 
 	return listener, nil
@@ -104,7 +104,6 @@ func (k *kafkaEventListener) Listen(events ...string) (<-chan msgqueue.Event, <-
 
 	return results, errors, nil
 }
-
 
 // Map registers event names that should be mapped to certain types.
 func (l *kafkaEventListener) Map(typ reflect.Type) {

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"time"
-	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"os"
 	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
-	"log"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
+	"log"
+	"os"
+	"time"
 )
 
 func main() {
@@ -17,10 +17,10 @@ func main() {
 	log.Println("emitting example event")
 
 	exampleEvent := &events.EventCreatedEvent{
-		ID: "asasd",
-		Name: "Wacken Open Air",
+		ID:    "asasd",
+		Name:  "Wacken Open Air",
 		Start: time.Now(),
-		End: time.Now().Add(3 * 24 * time.Hour),
+		End:   time.Now().Add(3 * 24 * time.Hour),
 	}
 
 	if url := os.Getenv("AMQP_URL"); url != "" {

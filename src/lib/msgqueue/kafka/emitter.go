@@ -1,13 +1,13 @@
 package kafka
 
 import (
-	"github.com/Shopify/sarama"
+	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"encoding/json"
+	"github.com/Shopify/sarama"
 	"log"
 	"os"
 	"strings"
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func NewKafkaEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
 		brokers = strings.Split(brokerList, ",")
 	}
 
-	client := <- kafka.RetryConnect(brokers, 5 * time.Second)
+	client := <-kafka.RetryConnect(brokers, 5*time.Second)
 	return NewKafkaEventEmitter(client)
 }
 
@@ -59,7 +59,7 @@ func (k *kafkaEventEmitter) Emit(evt msgqueue.Event) error {
 		}
 	}()
 
-	success := <- k.producer.Successes()
+	success := <-k.producer.Successes()
 	log.Printf("message successfully published: %v", success)
 	return nil
 }

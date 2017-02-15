@@ -1,16 +1,16 @@
 package msgqueue
 
 import (
-	"reflect"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"reflect"
 )
 
 type EventMapper struct {
 	typeMap map[string]reflect.Type
 }
 
-func NewEventMapper() (*EventMapper) {
+func NewEventMapper() *EventMapper {
 	return &EventMapper{
 		typeMap: make(map[string]reflect.Type),
 	}

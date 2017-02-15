@@ -1,16 +1,16 @@
 package amqp
 
 import (
-	"github.com/streadway/amqp"
-	"fmt"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
-	"reflect"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"fmt"
+	"github.com/streadway/amqp"
 	"os"
+	"reflect"
 	"time"
 )
 
-const eventNameHeader = "x-event-name";
+const eventNameHeader = "x-event-name"
 
 type amqpEventListener struct {
 	channel  *amqp.Channel
@@ -44,7 +44,7 @@ func NewAMQPEventListenerFromEnvironment() (msgqueue.EventListener, error) {
 		queue = "example"
 	}
 
-	conn := <- amqphelper.RetryConnect(url, 5 * time.Second)
+	conn := <-amqphelper.RetryConnect(url, 5*time.Second)
 	return NewAMQPEventListener(conn, exchange, queue)
 }
 
@@ -60,10 +60,10 @@ func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) 
 	}
 
 	listener := amqpEventListener{
-		channel: channel,
+		channel:  channel,
 		exchange: exchange,
-		queue: queue,
-		mapper: msgqueue.NewEventMapper(),
+		queue:    queue,
+		mapper:   msgqueue.NewEventMapper(),
 	}
 
 	err = channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)

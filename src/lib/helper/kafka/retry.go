@@ -1,10 +1,10 @@
 package kafka
 
 import (
-	"github.com/streadway/amqp"
-	"time"
-	"log"
 	"github.com/Shopify/sarama"
+	"github.com/streadway/amqp"
+	"log"
+	"time"
 )
 
 // RetryConnect implements a retry mechanism for establishing the Kafka connection.
@@ -19,7 +19,7 @@ import (
 //
 // [1] http://stackoverflow.com/q/25503412/1995300
 // [1] https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
-func RetryConnect(brokers []string, retryInterval time.Duration) (chan sarama.Client) {
+func RetryConnect(brokers []string, retryInterval time.Duration) chan sarama.Client {
 	result := make(chan sarama.Client)
 
 	go func() {
