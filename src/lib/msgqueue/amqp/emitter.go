@@ -1,10 +1,13 @@
 package amqp
 
 import (
-	"github.com/streadway/amqp"
+	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"encoding/json"
 	"fmt"
+	"github.com/streadway/amqp"
+	"os"
+	"time"
 )
 
 type amqpEventEmitter struct {
@@ -16,6 +19,29 @@ type amqpEventEmitter struct {
 type emittedEvent struct {
 	event     msgqueue.Event
 	errorChan chan error
+}
+
+// NewAMQPEventEmitterFromEnvironment will create a new event emitter from
+// the configured environment variables. Important variables are:
+//
+//   - AMQP_URL; the URL of the AMQP broker to connect to
+//   - AMQP_EXCHANGE; the name of the exchange to bind to
+//
+// For missing environment variables, this function will assume sane defaults.
+func NewAMQPEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
+	var url string
+	var exchange string
+
+	if url = os.Getenv("AMQP_URL"); url == "" {
+		url = "amqp://localhost:5672"
+	}
+
+	if exchange = os.Getenv("AMQP_EXCHANGE"); exchange == "" {
+		exchange = "example"
+	}
+
+	conn := <-amqphelper.RetryConnect(url, 5*time.Second)
+	return NewAMQPEventEmitter(conn, exchange)
 }
 
 // NewAMQPEventEmitter creates a new event emitter.
@@ -30,9 +56,9 @@ func NewAMQPEventEmitter(conn *amqp.Connection, exchange string) (msgqueue.Event
 	}
 
 	emitter := amqpEventEmitter{
-		channel: channel,
+		channel:  channel,
 		exchange: exchange,
-		events: make(chan *emittedEvent),
+		events:   make(chan *emittedEvent),
 	}
 
 	// Normally, all(many) of these options should be configurable.
@@ -70,7 +96,7 @@ func (e *amqpEventEmitter) emitItem(item *emittedEvent) {
 			"x-event-name": item.event.EventName(),
 		},
 		ContentType: "application/json",
-		Body: jsonBody,
+		Body:        jsonBody,
 	}
 
 	err = e.channel.Publish(e.exchange, item.event.EventName(), false, false, pub)
@@ -82,7 +108,7 @@ func (e *amqpEventEmitter) emitItem(item *emittedEvent) {
 func (e *amqpEventEmitter) Emit(event msgqueue.Event) error {
 	errChan := make(chan error)
 	item := &emittedEvent{
-		event: event,
+		event:     event,
 		errorChan: errChan,
 	}
 

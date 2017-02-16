@@ -10,5 +10,5 @@ type LocationCreatedEvent struct {
 
 // EventName returns the event's name
 func (c *LocationCreatedEvent) EventName() string {
-	return "locationCreated";
+	return "locationCreated"
 }

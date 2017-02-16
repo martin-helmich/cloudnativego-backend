@@ -1,26 +1,52 @@
 package main
 
 import (
-	"time"
-	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"os"
 	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 	"log"
+	"os"
+	"time"
 )
 
 func main() {
-	conn := <- amqp.RetryConnect(os.Getenv("AMQP_URL"), 5 * time.Second)
-
-	time.Sleep(10 * time.Second)
+	var emitter msgqueue.EventEmitter
+	var err error
 
 	log.Println("emitting example event")
 
-	emitter, _ := evtamqp.NewAMQPEventEmitter(conn, "example")
-	emitter.Emit(&events.EventCreatedEvent{
-		ID: "asasd",
-		Name: "Wacken Open Air",
+	exampleEvent := &events.EventCreatedEvent{
+		ID:    "asasd",
+		Name:  "Wacken Open Air",
 		Start: time.Now(),
-		End: time.Now().Add(3 * 24 * time.Hour),
-	})
+		End:   time.Now().Add(3 * 24 * time.Hour),
+	}
+
+	if url := os.Getenv("AMQP_URL"); url != "" {
+		log.Printf("connecting to AMQP broker at %s", url)
+
+		emitter, err = evtamqp.NewAMQPEventEmitterFromEnvironment()
+		if err != nil {
+			panic(err)
+		}
+	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
+		log.Printf("connecting to Kafka brokers at %s", brokers)
+
+		emitter, err = kafka.NewKafkaEventEmitterFromEnvironment()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		panic("Neither AMQP_URL nor KAFKA_BROKERS specified")
+	}
+
+	log.Println("sleeping 10 seconds")
+	time.Sleep(10 * time.Second)
+
+	log.Println("emitting example event")
+	err = emitter.Emit(exampleEvent)
+	if err != nil {
+		panic(err)
+	}
 }

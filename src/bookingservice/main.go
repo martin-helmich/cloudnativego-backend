@@ -1,33 +1,57 @@
 package main
 
 import (
-	"time"
-	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
+	"fmt"
+	"github.com/Shopify/sarama"
+	"log"
 	"os"
 	"reflect"
-	"fmt"
-	"log"
+	"strings"
+	"time"
 )
 
 func main() {
-	conn := <- amqp.RetryConnect(os.Getenv("AMQP_URL"), 5 * time.Second)
+	var listener msgqueue.EventListener
+	var err error
 
-	listener, err := evtamqp.NewAMQPEventListener(conn, "example", "queue")
+	if url := os.Getenv("AMQP_URL"); url != "" {
+		log.Printf("connecting to AMQP broker at %s", url)
+
+		listener, err = evtamqp.NewAMQPEventListenerFromEnvironment()
+		if err != nil {
+			panic(err)
+		}
+	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
+		log.Printf("connecting to Kafka brokers at %s", brokers)
+
+		listener, err = kafka.NewKafkaEventListenerFromEnvironment()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		panic("Neither AMQP_URL nor KAFKA_BROKERS specified")
+	}
+
+	log.Println("listening or events")
+
+	listener.Map(reflect.TypeOf(events.EventCreatedEvent{}))
+	received, errors, err := listener.Listen("eventCreated")
+
 	if err != nil {
 		panic(err)
 	}
 
-	listener.Map("eventCreated", reflect.TypeOf(events.EventCreatedEvent{}))
-	received, errors, err := listener.Listen("eventCreated")
 	for {
 		select {
 		case evt := <-received:
 			fmt.Printf("got event %T: %s\n", evt, evt)
 			handleEvent(evt)
-		case err = <- errors:
+		case err = <-errors:
 			fmt.Printf("got error while receiving event: %s\n", err)
 		}
 	}

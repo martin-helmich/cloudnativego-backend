@@ -1,20 +1,51 @@
 package amqp
 
 import (
-	"github.com/streadway/amqp"
-	"fmt"
+	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"fmt"
+	"github.com/streadway/amqp"
+	"os"
 	"reflect"
-	"encoding/json"
+	"time"
 )
 
-const eventNameHeader = "x-event-name";
+const eventNameHeader = "x-event-name"
 
 type amqpEventListener struct {
 	channel  *amqp.Channel
 	exchange string
 	queue    string
-	typeMap  map[string]reflect.Type
+	mapper   *msgqueue.EventMapper
+}
+
+// NewAMQPEventListenerFromEnvironment will create a new event listener from
+// the configured environment variables. Important variables are:
+//
+//   - AMQP_URL; the URL of the AMQP broker to connect to
+//   - AMQP_EXCHANGE; the name of the exchange to bind to
+//   - AMQP_QUEUE; the name of the queue to bind and subscribe
+//
+// For missing environment variables, this function will assume sane defaults.
+func NewAMQPEventListenerFromEnvironment() (msgqueue.EventListener, error) {
+	var url string
+	var exchange string
+	var queue string
+
+	if url = os.Getenv("AMQP_URL"); url == "" {
+		url = "amqp://localhost:5672"
+	}
+
+	if exchange = os.Getenv("AMQP_EXCHANGE"); exchange == "" {
+		exchange = "example"
+	}
+
+	if queue = os.Getenv("AMQP_QUEUE"); queue == "" {
+		queue = "example"
+	}
+
+	conn := <-amqphelper.RetryConnect(url, 5*time.Second)
+	return NewAMQPEventListener(conn, exchange, queue)
 }
 
 // NewAMQPEventListener creates a new event listener.
@@ -22,17 +53,17 @@ type amqpEventListener struct {
 // to create its own channel (note: AMQP channels are not thread-safe, so just
 // accepting the connection as a parameter and then creating our own private
 // channel is the safest way to ensure this).
-func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) (*amqpEventListener, error) {
+func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) (msgqueue.EventListener, error) {
 	channel, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("could not create AMQP channel: %s", err)
 	}
 
 	listener := amqpEventListener{
-		channel: channel,
+		channel:  channel,
 		exchange: exchange,
-		queue: queue,
-		typeMap: make(map[string]reflect.Type),
+		queue:    queue,
+		mapper:   msgqueue.NewEventMapper(),
 	}
 
 	err = channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
@@ -85,24 +116,7 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 				return
 			}
 
-			typ, ok := l.typeMap[eventName]
-			if !ok {
-				errors <- fmt.Errorf("no mapping configured for event %s", eventName)
-				msg.Nack(false, false)
-				return
-			}
-
-			instance := reflect.New(typ)
-			iface := instance.Interface()
-
-			event, ok := iface.(msgqueue.Event)
-			if !ok {
-				errors <- fmt.Errorf("type %T does not implement the Event interface", iface)
-				msg.Nack(false, false)
-				return
-			}
-
-			err := json.Unmarshal(msg.Body, event)
+			event, err := l.mapper.MapEvent(eventName, msg.Body)
 			if err != nil {
 				errors <- fmt.Errorf("could not unmarshal event %s: %s", eventName, err)
 				msg.Nack(false, false)
@@ -118,6 +132,6 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 }
 
 // Map registers event names that should be mapped to certain types.
-func (l *amqpEventListener) Map(eventName string, typ reflect.Type) {
-	l.typeMap[eventName] = typ
+func (l *amqpEventListener) Map(typ reflect.Type) {
+	l.mapper.RegisterMapping(typ)
 }
