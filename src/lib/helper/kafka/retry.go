@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"github.com/Shopify/sarama"
-	"github.com/streadway/amqp"
 	"log"
 	"time"
 )

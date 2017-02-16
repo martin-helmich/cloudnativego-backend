@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 	"time"
+	"strconv"
 )
 
 type kafkaEventListener struct {
@@ -32,7 +33,11 @@ func NewKafkaEventListenerFromEnvironment() (msgqueue.EventListener, error) {
 		partitions = make([]int32, len(partitionStrings))
 
 		for i := range partitionStrings {
-			partitions[i] = partitionStrings[i]
+			partition, err := strconv.Atoi(partitionStrings[i])
+			if err != nil {
+				return nil, err
+			}
+			partitions[i] = int32(partition)
 		}
 	}
 

@@ -2,17 +2,13 @@ package main
 
 import (
 	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 	"fmt"
-	"github.com/Shopify/sarama"
 	"log"
 	"os"
 	"reflect"
-	"strings"
-	"time"
 )
 
 func main() {
