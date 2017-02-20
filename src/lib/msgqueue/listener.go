@@ -1,6 +1,8 @@
 package msgqueue
 
-import "reflect"
+import (
+	"reflect"
+)
 
 // EventListener describes an interface for a class that can listen to events.
 type EventListener interface {

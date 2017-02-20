@@ -14,20 +14,24 @@ services:
     image: golang:1.7
     volumes:
       - ${GOPATH}/src/:/app/src
+    ports:
+      - 3001:3000
     environment:
       - GOPATH=/app
       #- AMQP_URL=amqp://rmq:5672/
       - KAFKA_BROKERS=kafka:9092
     working_dir: /app/src/bitbucket.org/minamartinteam/myevents/src/eventservice
-    command: go run main.go
+    command: /bin/sh -c "go build -v && ./eventservice"
 
   booking:
     image: golang:1.7
     volumes:
       - ${GOPATH}/src/:/app/src
+    ports:
+      - 3000:3000
     environment:
       - GOPATH=/app
       #- AMQP_URL=amqp://rmq:5672/
       - KAFKA_BROKERS=kafka:9092
     working_dir: /app/src/bitbucket.org/minamartinteam/myevents/src/bookingservice
-    command: go run main.go
+    command: /bin/sh -c "go build -v && ./bookingservice"
