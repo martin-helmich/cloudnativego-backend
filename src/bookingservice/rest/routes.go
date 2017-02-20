@@ -11,8 +11,8 @@ func ServeAPI(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	r := mux.NewRouter()
-	r.Methods("get").Handler("/events/{eventID}/bookings", &ListBookingHandler{})
-	r.Methods("post").Handler("/events/{eventID}/bookings", &CreateBookingHandler{})
+	r.Methods("get").Path("/events/{eventID}/bookings").Handler(&ListBookingHandler{})
+	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{})
 
 	srv := http.Server{
 		Handler:      r,

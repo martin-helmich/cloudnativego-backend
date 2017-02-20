@@ -1,7 +1,5 @@
 package events
 
-import "time"
-
 // EventBookedEvent is emitted whenever an event is booked
 type EventBookedEvent struct {
 	EventID string `json:"eventId"`
