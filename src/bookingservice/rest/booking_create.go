@@ -50,7 +50,7 @@ func (h *CreateBookingHandler) ServeHTTP(res http.ResponseWriter, req *http.Requ
 	}
 
 	go func() {
-		h.eventEmitter.Emit(events.EventBookedEvent{
+		h.eventEmitter.Emit(&events.EventBookedEvent{
 			EventID: request.Event.ID,
 			UserID: "foo", // TODO: Authenticate user
 		})
