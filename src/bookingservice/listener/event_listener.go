@@ -6,7 +6,6 @@ import (
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/builder"
 	"fmt"
 	"log"
-	"reflect"
 	"sync"
 )
 
@@ -20,7 +19,6 @@ func ProcessEvents(wg *sync.WaitGroup) {
 
 	log.Println("listening or events")
 
-	listener.Map(reflect.TypeOf(events.EventCreatedEvent{}))
 	received, errors, err := listener.Listen("eventCreated")
 
 	if err != nil {
