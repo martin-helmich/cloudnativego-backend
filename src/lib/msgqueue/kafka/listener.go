@@ -7,7 +7,6 @@ import (
 	"github.com/Shopify/sarama"
 	"log"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 	"strconv"
@@ -17,7 +16,7 @@ type kafkaEventListener struct {
 	topic      string
 	consumer   sarama.Consumer
 	partitions []int32
-	mapper     *msgqueue.EventMapper
+	mapper     msgqueue.EventMapper
 }
 
 func NewKafkaEventListenerFromEnvironment() (msgqueue.EventListener, error) {
@@ -110,7 +109,6 @@ func (k *kafkaEventListener) Listen(events ...string) (<-chan msgqueue.Event, <-
 	return results, errors, nil
 }
 
-// Map registers event names that should be mapped to certain types.
-func (l *kafkaEventListener) Map(typ reflect.Type) {
-	l.mapper.RegisterMapping(typ)
+func (l *kafkaEventListener) Mapper() msgqueue.EventMapper {
+	return l.mapper
 }

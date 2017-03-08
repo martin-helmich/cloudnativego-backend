@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/streadway/amqp"
 	"os"
-	"reflect"
 	"time"
 )
 
@@ -16,7 +15,7 @@ type amqpEventListener struct {
 	channel  *amqp.Channel
 	exchange string
 	queue    string
-	mapper   *msgqueue.EventMapper
+	mapper   msgqueue.EventMapper
 }
 
 // NewAMQPEventListenerFromEnvironment will create a new event listener from
@@ -131,7 +130,6 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 	return events, errors, nil
 }
 
-// Map registers event names that should be mapped to certain types.
-func (l *amqpEventListener) Map(typ reflect.Type) {
-	l.mapper.RegisterMapping(typ)
+func (l *amqpEventListener) Mapper() msgqueue.EventMapper {
+	return l.mapper
 }
