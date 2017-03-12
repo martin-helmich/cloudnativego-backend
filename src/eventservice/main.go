@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/contracts"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
@@ -16,7 +16,7 @@ func main() {
 
 	log.Println("emitting example event")
 
-	exampleEvent := &events.EventCreatedEvent{
+	exampleEvent := &contracts.EventCreatedEvent{
 		ID:    "asasd",
 		Name:  "Wacken Open Air",
 		Start: time.Now(),

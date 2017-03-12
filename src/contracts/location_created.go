@@ -1,4 +1,4 @@
-package events
+package contracts
 
 // LocationCreatedEvent is emitted whenever a location is created
 type LocationCreatedEvent struct {

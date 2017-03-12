@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"github.com/nu7hatch/gouuid"
-	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/contracts"
 )
 
 type eventRef struct {
@@ -50,7 +50,7 @@ func (h *CreateBookingHandler) ServeHTTP(res http.ResponseWriter, req *http.Requ
 	}
 
 	go func() {
-		h.eventEmitter.Emit(&events.EventBookedEvent{
+		h.eventEmitter.Emit(&contracts.EventBookedEvent{
 			EventID: request.Event.ID,
 			UserID: "foo", // TODO: Authenticate user
 		})

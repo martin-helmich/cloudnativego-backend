@@ -3,7 +3,7 @@ package msgqueue
 import (
 	"fmt"
 	"encoding/json"
-	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/contracts"
 )
 
 type StaticEventMapper struct {}
@@ -13,11 +13,11 @@ func (e *StaticEventMapper) MapEvent(eventName string, serialized []byte) (Event
 
 	switch eventName {
 	case "eventCreated":
-		event = &events.EventCreatedEvent{}
+		event = &contracts.EventCreatedEvent{}
 	case "locationCreated":
-		event = &events.LocationCreatedEvent{}
+		event = &contracts.LocationCreatedEvent{}
 	case "eventBooked":
-		event = &events.EventBookedEvent{}
+		event = &contracts.EventBookedEvent{}
 	default:
 		return nil, fmt.Errorf("unknown event type %s", eventName)
 	}

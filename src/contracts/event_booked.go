@@ -1,4 +1,4 @@
-package events
+package contracts
 
 // EventBookedEvent is emitted whenever an event is booked
 type EventBookedEvent struct {

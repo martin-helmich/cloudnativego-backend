@@ -1,7 +1,7 @@
 package listener
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/contracts/events"
+	"bitbucket.org/minamartinteam/myevents/src/contracts"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/builder"
 	"fmt"
@@ -38,9 +38,9 @@ func ProcessEvents(wg *sync.WaitGroup) {
 
 func handleEvent(event msgqueue.Event) {
 	switch e := event.(type) {
-	case *events.EventCreatedEvent:
+	case *contracts.EventCreatedEvent:
 		log.Printf("event %s created: %s", e.ID, e)
-	case *events.LocationCreatedEvent:
+	case *contracts.LocationCreatedEvent:
 		log.Printf("location %s created: %s", e.ID, e)
 	default:
 		log.Printf("unknown event type: %T", e)
