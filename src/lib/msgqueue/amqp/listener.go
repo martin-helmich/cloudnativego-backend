@@ -105,21 +105,21 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 			if !ok {
 				errors <- fmt.Errorf("message did not contain %s header", eventNameHeader)
 				msg.Nack(false, false)
-				return
+				continue
 			}
 
 			eventName, ok := rawEventName.(string)
 			if !ok {
 				errors <- fmt.Errorf("header %s did not contain string", eventNameHeader)
 				msg.Nack(false, false)
-				return
+				continue
 			}
 
 			event, err := l.mapper.MapEvent(eventName, msg.Body)
 			if err != nil {
 				errors <- fmt.Errorf("could not unmarshal event %s: %s", eventName, err)
 				msg.Nack(false, false)
-				return
+				continue
 			}
 
 			events <- event
