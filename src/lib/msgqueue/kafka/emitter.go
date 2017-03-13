@@ -1,14 +1,15 @@
 package kafka
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"encoding/json"
-	"github.com/Shopify/sarama"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"github.com/Shopify/sarama"
 )
 
 type kafkaEventEmitter struct {
@@ -52,7 +53,6 @@ func (k *kafkaEventEmitter) Emit(evt msgqueue.Event) error {
 
 	k.producer.Input() <- msg
 	log.Printf("published message with topic %s: %v", evt.EventName(), jsonBody)
-
 	go func() {
 		for err := range k.producer.Errors() {
 			log.Printf("error on emitter: %s", err)

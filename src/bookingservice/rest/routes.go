@@ -1,10 +1,11 @@
 package rest
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
-	"time"
 	"sync"
+	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func ServeAPI(wg *sync.WaitGroup) {
