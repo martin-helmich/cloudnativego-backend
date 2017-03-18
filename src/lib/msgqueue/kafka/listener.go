@@ -13,7 +13,6 @@ import (
 )
 
 type kafkaEventListener struct {
-	topic      string
 	consumer   sarama.Consumer
 	partitions []int32
 	mapper     msgqueue.EventMapper
@@ -63,47 +62,46 @@ func NewKafkaEventListener(client sarama.Client, partitions []int32) (msgqueue.E
 func (k *kafkaEventListener) Listen(events ...string) (<-chan msgqueue.Event, <-chan error, error) {
 	var err error
 
+	topic := "events"
 	results := make(chan msgqueue.Event)
 	errors := make(chan error)
 
-	for _, topic := range events {
-		partitions := k.partitions
-		if len(partitions) == 0 {
-			partitions, err = k.consumer.Partitions(topic)
-			if err != nil {
-				return nil, nil, err
-			}
+	partitions := k.partitions
+	if len(partitions) == 0 {
+		partitions, err = k.consumer.Partitions(topic)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	log.Printf("topic %s has partitions: %v", topic, partitions)
+
+	for _, partition := range partitions {
+		log.Printf("consuming partition %s:%d", topic, partition)
+
+		pConsumer, err := k.consumer.ConsumePartition(topic, partition, 0)
+		if err != nil {
+			return nil, nil, err
 		}
 
-		log.Printf("topic %s has partitions: %v", topic, partitions)
+		go func() {
+			for msg := range pConsumer.Messages() {
+				log.Printf("received message %v", msg)
 
-		for _, partition := range partitions {
-			log.Printf("consuming partition %s:%d", topic, partition)
+				event, err := k.mapper.MapEvent(msg.Topic, msg.Value)
+				if err != nil {
+					errors <- fmt.Errorf("could not map message: %v", err)
+				}
 
-			pConsumer, err := k.consumer.ConsumePartition(topic, partition, 0)
-			if err != nil {
-				return nil, nil, err
+				results <- event
 			}
+		}()
 
-			go func() {
-				for msg := range pConsumer.Messages() {
-					log.Printf("received message %v", msg)
-
-					event, err := k.mapper.MapEvent(msg.Topic, msg.Value)
-					if err != nil {
-						errors <- fmt.Errorf("could not map message: %v", err)
-					}
-
-					results <- event
-				}
-			}()
-
-			go func() {
-				for err := range pConsumer.Errors() {
-					errors <- err
-				}
-			}()
-		}
+		go func() {
+			for err := range pConsumer.Errors() {
+				errors <- err
+			}
+		}()
 	}
 
 	return results, errors, nil

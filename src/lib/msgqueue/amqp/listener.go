@@ -12,10 +12,10 @@ import (
 const eventNameHeader = "x-event-name"
 
 type amqpEventListener struct {
-	channel  *amqp.Channel
-	exchange string
-	queue    string
-	mapper   msgqueue.EventMapper
+	connection *amqp.Connection
+	exchange   string
+	queue      string
+	mapper     msgqueue.EventMapper
 }
 
 // NewAMQPEventListenerFromEnvironment will create a new event listener from
@@ -53,24 +53,35 @@ func NewAMQPEventListenerFromEnvironment() (msgqueue.EventListener, error) {
 // accepting the connection as a parameter and then creating our own private
 // channel is the safest way to ensure this).
 func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) (msgqueue.EventListener, error) {
-	channel, err := conn.Channel()
-	if err != nil {
-		return nil, fmt.Errorf("could not create AMQP channel: %s", err)
-	}
-
 	listener := amqpEventListener{
-		channel:  channel,
-		exchange: exchange,
-		queue:    queue,
-		mapper:   msgqueue.NewEventMapper(),
-	}
-
-	err = channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
-	if err != nil {
-		return nil, err
+		connection: conn,
+		exchange:   exchange,
+		queue:      queue,
+		mapper:     msgqueue.NewEventMapper(),
 	}
 
 	return &listener, nil
+}
+
+func (a *amqpEventListener) setup() error {
+	channel, err := a.connection.Channel()
+	if err != nil {
+		return err
+	}
+
+	defer channel.Close()
+
+	err = channel.ExchangeDeclare(a.exchange, "topic", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	_, err = channel.QueueDeclare(a.queue, true, false, false, false, nil)
+	if err != nil {
+		return fmt.Errorf("could not declare queue %s: %s", a.queue, err)
+	}
+
+	return nil
 }
 
 // Listen configures the event listener to listen for a set of events that are
@@ -79,19 +90,21 @@ func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) 
 // events, the other will contain errors for messages that could not be
 // successfully decoded.
 func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event, <-chan error, error) {
-	_, err := l.channel.QueueDeclare(l.queue, true, false, false, false, nil)
+	channel, err := l.connection.Channel()
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not declare queue %s: %s", l.queue, err)
+		return nil, nil, err
 	}
+
+	defer channel.Close()
 
 	// Create binding between queue and exchange for each listened event type
 	for _, event := range eventNames {
-		if err := l.channel.QueueBind(l.queue, event, l.exchange, false, nil); err != nil {
+		if err := channel.QueueBind(l.queue, event, l.exchange, false, nil); err != nil {
 			return nil, nil, fmt.Errorf("could not bind event %s to queue %s: %s", event, l.queue, err)
 		}
 	}
 
-	msgs, err := l.channel.Consume(l.queue, "", false, false, false, false, nil)
+	msgs, err := channel.Consume(l.queue, "", false, false, false, false, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not consume queue: %s", err)
 	}

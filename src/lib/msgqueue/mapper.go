@@ -1,7 +1,7 @@
 package msgqueue
 
 type EventMapper interface {
-	MapEvent(string, []byte) (Event, error)
+	MapEvent(string, interface{}) (Event, error)
 }
 
 func NewEventMapper() EventMapper {

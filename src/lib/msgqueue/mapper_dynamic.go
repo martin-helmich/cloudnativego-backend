@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"github.com/mitchellh/mapstructure"
 )
 type DynamicEventMapper struct {
 	typeMap map[string]reflect.Type
@@ -15,7 +16,7 @@ func NewDynamicEventMapper() EventMapper {
 	}
 }
 
-func (e *DynamicEventMapper) MapEvent(eventName string, serialized []byte) (Event, error) {
+func (e *DynamicEventMapper) MapEvent(eventName string, serialized interface{}) (Event, error) {
 	typ, ok := e.typeMap[eventName]
 	if !ok {
 		return nil, fmt.Errorf("no mapping configured for event %s", eventName)
@@ -29,9 +30,26 @@ func (e *DynamicEventMapper) MapEvent(eventName string, serialized []byte) (Even
 		return nil, fmt.Errorf("type %T does not implement the Event interface", iface)
 	}
 
-	err := json.Unmarshal(serialized, event)
-	if err != nil {
-		return nil, fmt.Errorf("could not unmarshal event %s: %s", eventName, err)
+	switch s := serialized.(type) {
+	case []byte:
+		err := json.Unmarshal(s, event)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarshal event %s: %s", eventName, err)
+		}
+	default:
+		cfg := mapstructure.DecoderConfig{
+			Result: event,
+			TagName: "json",
+		}
+		dec, err := mapstructure.NewDecoder(&cfg)
+		if err != nil {
+			return nil, fmt.Errorf("could not initialize decoder for event %s: %s", eventName, err)
+		}
+
+		err = dec.Decode(s)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarshal event %s: %s", eventName, err)
+		}
 	}
 
 	return event, nil

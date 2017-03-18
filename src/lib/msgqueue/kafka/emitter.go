@@ -13,7 +13,12 @@ import (
 )
 
 type kafkaEventEmitter struct {
-	producer sarama.AsyncProducer
+	producer sarama.SyncProducer
+}
+
+type kafkaMessageBody struct {
+	EventName string `json:"eventName"`
+	Payload interface{} `json:"payload"`
 }
 
 func NewKafkaEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
@@ -28,7 +33,7 @@ func NewKafkaEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
 }
 
 func NewKafkaEventEmitter(client sarama.Client) (msgqueue.EventEmitter, error) {
-	producer, err := sarama.NewAsyncProducerFromClient(client)
+	producer, err := sarama.NewSyncProducerFromClient(client)
 	if err != nil {
 		return nil, err
 	}
@@ -41,25 +46,21 @@ func NewKafkaEventEmitter(client sarama.Client) (msgqueue.EventEmitter, error) {
 }
 
 func (k *kafkaEventEmitter) Emit(evt msgqueue.Event) error {
-	jsonBody, err := json.Marshal(evt)
+	jsonBody, err := json.Marshal(kafkaMessageBody{
+		evt.EventName(),
+		evt,
+	})
 	if err != nil {
 		return err
 	}
 
 	msg := &sarama.ProducerMessage{
-		Topic: evt.EventName(),
+		Topic: "events",
 		Value: sarama.ByteEncoder(jsonBody),
 	}
 
-	k.producer.Input() <- msg
 	log.Printf("published message with topic %s: %v", evt.EventName(), jsonBody)
-	go func() {
-		for err := range k.producer.Errors() {
-			log.Printf("error on emitter: %s", err)
-		}
-	}()
+	_, _, err = k.producer.SendMessage(msg)
 
-	success := <-k.producer.Successes()
-	log.Printf("message successfully published: %v", success)
-	return nil
+	return err
 }

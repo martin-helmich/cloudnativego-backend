@@ -24,7 +24,8 @@ func RetryConnect(brokers []string, retryInterval time.Duration) chan sarama.Cli
 	go func() {
 		defer close(result)
 		for {
-			conn, err := sarama.NewClient(brokers, sarama.NewConfig())
+			config := sarama.NewConfig()
+			conn, err := sarama.NewClient(brokers, config)
 			if err == nil {
 				log.Println("connection successfully established")
 				result <- conn
