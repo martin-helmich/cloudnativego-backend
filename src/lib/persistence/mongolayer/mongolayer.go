@@ -60,6 +60,23 @@ func (mgoLayer *MongoDBLayer) FindBookingsForUser(id []byte) ([]persistence.Book
 	return u.Bookings, err
 }
 
+func (mgoLayer *MongoDBLayer) FindEvent(id []byte) (persistence.Event, error) {
+	s := mgoLayer.getFreshSession()
+	defer s.Close()
+	e := persistence.Event{}
+
+	err := s.DB(DB).C(EVENTS).FindId(bson.ObjectId(id)).One(&e)
+	return e, err
+}
+
+func (mgoLayer *MongoDBLayer) FindEventByName(name string) (persistence.Event, error) {
+	s := mgoLayer.getFreshSession()
+	defer s.Close()
+	e := persistence.Event{}
+	err := s.DB(DB).C(EVENTS).Find(bson.M{"name": name}).One(&e)
+	return e, err
+}
+
 func (mgoLayer *MongoDBLayer) FindAllAvailableEvents() ([]persistence.Event, error) {
 	s := mgoLayer.getFreshSession()
 	defer s.Close()
@@ -67,6 +84,7 @@ func (mgoLayer *MongoDBLayer) FindAllAvailableEvents() ([]persistence.Event, err
 	err := s.DB(DB).C(EVENTS).Find(nil).All(&events)
 	return events, err
 }
+
 func (mgoLayer *MongoDBLayer) getFreshSession() *mgo.Session {
 	return mgoLayer.session.Copy()
 }

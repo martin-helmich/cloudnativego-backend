@@ -41,6 +41,14 @@ func (dynamoLayer *DynamoDBLayer) FindBookingsForUser(id []byte) ([]persistence.
 	return []persistence.Booking{}, nil
 }
 
+func (dynamoLayer *DynamoDBLayer) FindEvent(id []byte) (persistence.Event, error) {
+
+}
+
+func (dynamoLayer *DynamoDBLayer) FindEventByName(name string) (persistence.Event, error) {
+
+}
+
 func (dynamoLayer *DynamoDBLayer) FindAllAvailableEvents() ([]persistence.Event, error) {
 	return []persistence.Event{}, nil
 }

@@ -6,5 +6,7 @@ type DatabaseHandler interface {
 	AddBookingForUser([]byte, Booking) error
 	FindUser(string, string) (User, error)
 	FindBookingsForUser([]byte) ([]Booking, error)
+	FindEvent([]byte) (Event, error)
+	FindEventByName(string) (Event, error)
 	FindAllAvailableEvents() ([]Event, error)
 }

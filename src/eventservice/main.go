@@ -1,52 +1,25 @@
 package main
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/contracts"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	evtamqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
-	"log"
-	"os"
-	"time"
+	"flag"
+
+	"bitbucket.org/minamartinteam/myevents/src/eventservice/configuration"
+	"bitbucket.org/minamartinteam/myevents/src/eventservice/mqhandler"
+	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dbLayer"
 )
 
 func main() {
-	var emitter msgqueue.EventEmitter
-	var err error
+	confPath := flag.String("conf", `.\configuration\config.json`, "flag to set the path to the configuration json file")
+	flag.Parse()
+	//extract configuration
+	config := configuration.ExtractConfiguration(*confPath)
+	dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
 
-	log.Println("emitting example event")
+	//message queues
+	mqhandler.HandleMessageQueue()
 
-	exampleEvent := &contracts.EventCreatedEvent{
-		ID:    "asasd",
-		Name:  "Wacken Open Air",
-		Start: time.Now(),
-		End:   time.Now().Add(3 * 24 * time.Hour),
-	}
+	//RESTful API start
+	rest.ServeAPI(config.DBConnection, dbhandler)
 
-	if url := os.Getenv("AMQP_URL"); url != "" {
-		log.Printf("connecting to AMQP broker at %s", url)
-
-		emitter, err = evtamqp.NewAMQPEventEmitterFromEnvironment()
-		if err != nil {
-			panic(err)
-		}
-	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
-		log.Printf("connecting to Kafka brokers at %s", brokers)
-
-		emitter, err = kafka.NewKafkaEventEmitterFromEnvironment()
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		panic("Neither AMQP_URL nor KAFKA_BROKERS specified")
-	}
-
-	log.Println("sleeping 10 seconds")
-	time.Sleep(10 * time.Second)
-
-	log.Println("emitting example event")
-	err = emitter.Emit(exampleEvent)
-	if err != nil {
-		panic(err)
-	}
 }

@@ -5,13 +5,16 @@ import (
 	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/mongolayer"
 )
 
+type DBTYPE string
+
 const (
-	MONGODB = iota
-	DOCUMENTDB
-	DYNAMODB
+	MONGODB    DBTYPE = "mongodb"
+	DOCUMENTDB DBTYPE = "documentdb"
+	DYNAMODB   DBTYPE = "dynamodb"
 )
 
-func NewPersistenceLayer(options int, connection string) (persistence.DatabaseHandler, error) {
+func NewPersistenceLayer(options DBTYPE, connection string) (persistence.DatabaseHandler, error) {
+
 	switch options {
 	case MONGODB:
 		return mongolayer.NewMongoDBLayer(connection)
