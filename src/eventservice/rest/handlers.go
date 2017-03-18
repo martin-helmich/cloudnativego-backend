@@ -15,17 +15,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type eventSericeHandler struct {
+type eventServiceHandler struct {
 	dbhandler persistence.DatabaseHandler
 }
 
-func newEventHandler(databasehandler persistence.DatabaseHandler) *eventSericeHandler {
-	return &eventSericeHandler{
+func newEventHandler(databasehandler persistence.DatabaseHandler) *eventServiceHandler {
+	return &eventServiceHandler{
 		dbhandler: databasehandler,
 	}
 }
 
-func (eh *eventSericeHandler) findEventHandler(w http.ResponseWriter, r *http.Request) {
+func (eh *eventServiceHandler) findEventHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	criteria, ok := vars["SearchCriteria"]
 	if !ok {
@@ -58,7 +58,7 @@ func (eh *eventSericeHandler) findEventHandler(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(&event)
 }
 
-func (eh *eventSericeHandler) allEventHandler(w http.ResponseWriter, r *http.Request) {
+func (eh *eventServiceHandler) allEventHandler(w http.ResponseWriter, r *http.Request) {
 	events, err := eh.dbhandler.FindAllAvailableEvents()
 	if err != nil {
 		fmt.Fprintf(w, "Error occrued while trying to find all available events %s", err)
@@ -70,7 +70,7 @@ func (eh *eventSericeHandler) allEventHandler(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (eh *eventSericeHandler) newEventHandler(w http.ResponseWriter, r *http.Request) {
+func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Request) {
 	event := persistence.Event{}
 	err := json.NewDecoder(r.Body).Decode(&event)
 	if nil != err {
