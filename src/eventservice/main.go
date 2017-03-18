@@ -6,7 +6,7 @@ import (
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/configuration"
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/mqhandler"
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dbLayer"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
 )
 
 func main() {

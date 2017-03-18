@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dbLayer"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
 )
 
 const (
