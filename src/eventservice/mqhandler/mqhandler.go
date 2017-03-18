@@ -1,6 +1,7 @@
 package mqhandler
 
 import (
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -11,7 +12,7 @@ import (
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 )
 
-func HandleMessageQueue() {
+func HandleMessageQueue() error {
 
 	var emitter msgqueue.EventEmitter
 	var err error
@@ -31,17 +32,17 @@ func HandleMessageQueue() {
 		emitter, err = evtamqp.NewAMQPEventEmitterFromEnvironment()
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 	} else if brokers := os.Getenv("KAFKA_BROKERS"); brokers != "" {
 		log.Printf("connecting to Kafka brokers at %s", brokers)
 
 		emitter, err = kafka.NewKafkaEventEmitterFromEnvironment()
 		if err != nil {
-			panic(err)
+			return err
 		}
 	} else {
-		panic("Neither AMQP_URL nor KAFKA_BROKERS specified")
+		errors.New("Neither AMQP_URL nor KAFKA_BROKERS specified")
 	}
 
 	log.Println("sleeping 10 seconds")
@@ -50,6 +51,7 @@ func HandleMessageQueue() {
 	log.Println("emitting example event")
 	err = emitter.Emit(exampleEvent)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }

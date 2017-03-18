@@ -33,12 +33,14 @@ func (eh *eventSericeHandler) findEventHandler(w http.ResponseWriter, r *http.Re
 						to search by name via /name/coldplayconcert`)
 		return
 	}
+
 	searchkey, ok := vars["search"]
 	if !ok {
 		fmt.Fprint(w, `No search keys found, you can either search by id via /id/4
 						to search by name via /name/coldplayconcert`)
 		return
 	}
+
 	var event persistence.Event
 	var err error
 	switch strings.ToLower(criteria) {

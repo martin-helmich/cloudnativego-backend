@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler) {
+func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler) error {
 
 	handler := newEventHandler(dbHandler)
 	r := mux.NewRouter()
@@ -15,5 +15,5 @@ func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler) {
 	eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.findEventHandler)
 	eventsrouter.Methods("GET").Path("/all").HandlerFunc(handler.allEventHandler)
 	eventsrouter.Methods("POST").Path("/New/").HandlerFunc(handler.newEventHandler)
-	http.ListenAndServe(endpoint, r)
+	return http.ListenAndServe(endpoint, r)
 }

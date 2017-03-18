@@ -20,6 +20,6 @@ func main() {
 	mqhandler.HandleMessageQueue()
 
 	//RESTful API start
-	rest.ServeAPI(config.DBConnection, dbhandler)
+	rest.ServeAPI(config.RestfulEndpoint, dbhandler)
 
 }
