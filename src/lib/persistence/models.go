@@ -44,7 +44,7 @@ type Location struct {
 }
 
 type Hall struct {
-	Name     string
-	Location string
-	Capacity int
+	Name     string `json:"name"`
+	Location string `json:"location,omitempty"`
+	Capacity int    `json:"capacity"`
 }
