@@ -58,8 +58,11 @@ func (eh *eventServiceHandler) findEventHandler(w http.ResponseWriter, r *http.R
 		}
 	}
 	if err != nil {
+		w.WriteHeader(404)
 		fmt.Fprintf(w, "Error occured %s", err)
+		return
 	}
+	w.Header().Set("Content-Type", "application/json;charset=utf8")
 	json.NewEncoder(w).Encode(&event)
 }
 
@@ -70,6 +73,7 @@ func (eh *eventServiceHandler) allEventHandler(w http.ResponseWriter, r *http.Re
 		fmt.Fprintf(w, "Error occured while trying to find all available events %s", err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json;charset=utf8")
 	err = json.NewEncoder(w).Encode(&events)
 	if err != nil {
 		w.WriteHeader(500)
@@ -102,5 +106,6 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 	eh.eventEmitter.Emit(&msg)
 
 	w.WriteHeader(201)
+	w.Header().Set("Content-Type", "application/json;charset=utf8")
 	json.NewEncoder(w).Encode(&event)
 }
