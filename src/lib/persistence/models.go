@@ -34,6 +34,7 @@ type Event struct {
 }
 
 type Location struct {
+	ID        bson.ObjectId `bson:"_id"`
 	Name      string
 	Address   string
 	Country   string
