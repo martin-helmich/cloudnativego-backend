@@ -66,12 +66,14 @@ func (eh *eventServiceHandler) findEventHandler(w http.ResponseWriter, r *http.R
 func (eh *eventServiceHandler) allEventHandler(w http.ResponseWriter, r *http.Request) {
 	events, err := eh.dbhandler.FindAllAvailableEvents()
 	if err != nil {
-		fmt.Fprintf(w, "Error occrued while trying to find all available events %s", err)
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "Error occured while trying to find all available events %s", err)
 		return
 	}
 	err = json.NewEncoder(w).Encode(&events)
 	if err != nil {
-		fmt.Fprintf(w, "Error occrued while trying encode events to JSON %s", err)
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "Error occured while trying encode events to JSON %s", err)
 	}
 }
 
@@ -79,11 +81,13 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 	event := persistence.Event{}
 	err := json.NewDecoder(r.Body).Decode(&event)
 	if nil != err {
+		w.WriteHeader(500)
 		fmt.Fprintf(w, "error occured while decoding event data %s", err)
 		return
 	}
 	id, err := eh.dbhandler.AddEvent(event)
 	if nil != err {
+		w.WriteHeader(500)
 		fmt.Fprintf(w, "error occured while decoding event data %s", err)
 		return
 	}
@@ -97,5 +101,6 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 	}
 	eh.eventEmitter.Emit(&msg)
 
-	fmt.Fprint(w, hex.EncodeToString(id))
+	w.WriteHeader(201)
+	json.NewEncoder(w).Encode(&event)
 }
