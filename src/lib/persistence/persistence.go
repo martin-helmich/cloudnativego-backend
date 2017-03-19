@@ -10,5 +10,6 @@ type DatabaseHandler interface {
 	FindEvent([]byte) (Event, error)
 	FindEventByName(string) (Event, error)
 	FindAllAvailableEvents() ([]Event, error)
+	FindLocation() (Location, error)
 	FindAllLocations() ([]Location, error)
 }

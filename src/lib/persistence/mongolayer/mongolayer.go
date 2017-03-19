@@ -94,6 +94,14 @@ func (mgoLayer *MongoDBLayer) FindAllAvailableEvents() ([]persistence.Event, err
 	return events, err
 }
 
+func (l *MongoDBLayer) FindLocation(id string) (persistence.Location, error) {
+	s := l.getFreshSession()
+	defer s.Close()
+	location := persistence.Location{}
+	err := s.DB(DB).C(LOCATIONS).Find(bson.M{"_id": bson.ObjectId(id)}).One(&location)
+	return location, err
+}
+
 func (l *MongoDBLayer) FindAllLocations() ([]persistence.Location, error) {
 	s := l.getFreshSession()
 	defer s.Close()
