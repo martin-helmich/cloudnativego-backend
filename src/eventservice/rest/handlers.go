@@ -13,15 +13,20 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"bitbucket.org/minamartinteam/myevents/src/contracts"
+	"time"
 )
 
 type eventServiceHandler struct {
 	dbhandler persistence.DatabaseHandler
+	eventEmitter msgqueue.EventEmitter
 }
 
-func newEventHandler(databasehandler persistence.DatabaseHandler) *eventServiceHandler {
+func newEventHandler(databasehandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) *eventServiceHandler {
 	return &eventServiceHandler{
 		dbhandler: databasehandler,
+		eventEmitter: eventEmitter,
 	}
 }
 
@@ -82,5 +87,15 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 		fmt.Fprintf(w, "error occured while decoding event data %s", err)
 		return
 	}
+
+	msg := contracts.EventCreatedEvent{
+		ID: hex.EncodeToString(id),
+		Name: event.Name,
+		Start: time.Unix(event.StartDate, 0),
+		End: time.Unix(event.EndDate, 0),
+		// LocationID: event.Location.ID,   TODO: Locations need an ID!
+	}
+	eh.eventEmitter.Emit(&msg)
+
 	fmt.Fprint(w, hex.EncodeToString(id))
 }
