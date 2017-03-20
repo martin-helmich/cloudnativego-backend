@@ -10,14 +10,14 @@ import (
 )
 
 type EventProcessor struct {
-	eventListener msgqueue.EventListener
-	database      persistence.DatabaseHandler
+	EventListener msgqueue.EventListener
+	Database      persistence.DatabaseHandler
 }
 
 func (p *EventProcessor) ProcessEvents() {
 	log.Println("listening or events")
 
-	received, errors, err := p.eventListener.Listen("eventCreated")
+	received, errors, err := p.EventListener.Listen("eventCreated")
 
 	if err != nil {
 		panic(err)
@@ -38,7 +38,7 @@ func (p *EventProcessor) handleEvent(event msgqueue.Event) {
 	switch e := event.(type) {
 	case *contracts.EventCreatedEvent:
 		log.Printf("event %s created: %s", e.ID, e)
-		p.database.AddEvent(persistence.Event{ID: bson.ObjectId(e.ID)})
+		p.Database.AddEvent(persistence.Event{ID: bson.ObjectId(e.ID)})
 	case *contracts.LocationCreatedEvent:
 		log.Printf("location %s created: %s", e.ID, e)
 		// TODO: No persistence for locations, yet

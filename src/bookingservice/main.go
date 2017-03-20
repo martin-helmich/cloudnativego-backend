@@ -11,12 +11,20 @@ import (
 	"github.com/Shopify/sarama"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/configuration"
+	"bitbucket.org/minamartinteam/myevents/src/bookingservice/listener"
 )
+
+func panicIfErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
 
 func main() {
 	var eventListener msgqueue.EventListener
+	var eventEmitter msgqueue.EventEmitter
 
-	confPath := flag.String("conf", `.\configuration\config.json`, "flag to set the path to the configuration json file")
+	confPath := flag.String("conf", "./configuration/config.json", "flag to set the path to the configuration json file")
 	flag.Parse()
 
 	//extract configuration
@@ -25,32 +33,31 @@ func main() {
 	switch config.MessageBrokerType {
 	case "amqp":
 		conn, err := amqp.Dial(config.AMQPMessageBroker)
-		if err != nil {
-			panic(err)
-		}
+		panicIfErr(err)
 
 		eventListener, err = msgqueue_amqp.NewAMQPEventListener(conn, "events", "booking")
-		if err != nil {
-			panic(err)
-		}
+		panicIfErr(err)
+
+		eventEmitter, err = msgqueue_amqp.NewAMQPEventEmitter(conn, "events")
+		panicIfErr(err)
 	case "kafka":
 		conf := sarama.NewConfig()
 		conn, err := sarama.NewClient(config.KafkaMessageBrokers, conf)
-		if err != nil {
-			panic(err)
-		}
+		panicIfErr(err)
 
 		eventListener, err = kafka.NewKafkaEventListener(conn, []int32{})
-		if err != nil {
-			panic(err)
-		}
+		panicIfErr(err)
+
+		eventEmitter, err = kafka.NewKafkaEventEmitter(conn)
+		panicIfErr(err)
 	default:
 		panic("Bad message broker type: " + config.MessageBrokerType)
 	}
 
 	dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
 
-	//RESTful API start
-	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventListener)
+	processor := listener.EventProcessor{eventListener, dbhandler}
+	go processor.ProcessEvents()
 
+	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter)
 }
