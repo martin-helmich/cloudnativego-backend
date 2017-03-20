@@ -1,17 +1,56 @@
 package main
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/bookingservice/rest"
-	"bitbucket.org/minamartinteam/myevents/src/bookingservice/listener"
-	"sync"
+	"flag"
+
+	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	msgqueue_amqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
+	"github.com/streadway/amqp"
+	"github.com/Shopify/sarama"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
+	"bitbucket.org/minamartinteam/myevents/src/eventservice/configuration"
 )
 
 func main() {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
+	var eventListener msgqueue.EventListener
 
-	go listener.ProcessEvents(&wg)
-	go rest.ServeAPI(&wg)
+	confPath := flag.String("conf", `.\configuration\config.json`, "flag to set the path to the configuration json file")
+	flag.Parse()
 
-	wg.Wait()
+	//extract configuration
+	config := configuration.ExtractConfiguration(*confPath)
+
+	switch config.MessageBrokerType {
+	case "amqp":
+		conn, err := amqp.Dial(config.AMQPMessageBroker)
+		if err != nil {
+			panic(err)
+		}
+
+		eventListener, err = msgqueue_amqp.NewAMQPEventListener(conn, "events", "booking")
+		if err != nil {
+			panic(err)
+		}
+	case "kafka":
+		conf := sarama.NewConfig()
+		conn, err := sarama.NewClient(config.KafkaMessageBrokers, conf)
+		if err != nil {
+			panic(err)
+		}
+
+		eventListener, err = kafka.NewKafkaEventListener(conn, []int32{})
+		if err != nil {
+			panic(err)
+		}
+	default:
+		panic("Bad message broker type: " + config.MessageBrokerType)
+	}
+
+	dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
+
+	//RESTful API start
+	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventListener)
+
 }
