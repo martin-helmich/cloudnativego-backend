@@ -20,7 +20,7 @@ func (u *User) String() string {
 
 type Booking struct {
 	Date    int64
-	Eventid []byte
+	EventID []byte
 	Seats   int
 }
 

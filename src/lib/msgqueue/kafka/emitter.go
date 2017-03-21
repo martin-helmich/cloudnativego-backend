@@ -16,7 +16,7 @@ type kafkaEventEmitter struct {
 	producer sarama.SyncProducer
 }
 
-type kafkaMessageBody struct {
+type messageEnvelope struct {
 	EventName string `json:"eventName"`
 	Payload interface{} `json:"payload"`
 }
@@ -46,7 +46,7 @@ func NewKafkaEventEmitter(client sarama.Client) (msgqueue.EventEmitter, error) {
 }
 
 func (k *kafkaEventEmitter) Emit(evt msgqueue.Event) error {
-	jsonBody, err := json.Marshal(kafkaMessageBody{
+	jsonBody, err := json.Marshal(messageEnvelope{
 		evt.EventName(),
 		evt,
 	})

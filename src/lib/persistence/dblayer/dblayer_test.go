@@ -127,12 +127,12 @@ func generateDemoBookingData(eventid1, eventid2 []byte) []persistence.Booking {
 		persistence.Booking{
 			Date:    time.Now().UnixNano(),
 			Seats:   4,
-			Eventid: eventid1,
+			EventID: eventid1,
 		},
 		persistence.Booking{
 			Date:    time.Now().UnixNano(),
 			Seats:   4,
-			Eventid: eventid2,
+			EventID: eventid2,
 		},
 	}
 }
