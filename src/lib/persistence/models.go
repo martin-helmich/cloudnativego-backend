@@ -34,6 +34,7 @@ type Event struct {
 }
 
 type Location struct {
+	ID        bson.ObjectId `bson:"_id"`
 	Name      string
 	Address   string
 	Country   string
@@ -43,7 +44,7 @@ type Location struct {
 }
 
 type Hall struct {
-	Name     string
-	Location string
-	Capacity int
+	Name     string `json:"name"`
+	Location string `json:"location,omitempty"`
+	Capacity int    `json:"capacity"`
 }

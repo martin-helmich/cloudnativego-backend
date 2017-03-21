@@ -101,11 +101,50 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 		Name: event.Name,
 		Start: time.Unix(event.StartDate, 0),
 		End: time.Unix(event.EndDate, 0),
-		// LocationID: event.Location.ID,   TODO: Locations need an ID!
+		LocationID: string(event.Location.ID),
 	}
 	eh.eventEmitter.Emit(&msg)
 
 	w.WriteHeader(201)
 	w.Header().Set("Content-Type", "application/json;charset=utf8")
 	json.NewEncoder(w).Encode(&event)
+}
+
+func (eh *eventServiceHandler) allLocationsHandler(w http.ResponseWriter, r *http.Request) {
+	locations, err := eh.dbhandler.FindAllLocations()
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "could not load locations: %s", err)
+		return
+	}
+
+	json.NewEncoder(w).Encode(locations)
+}
+
+func (eh *eventServiceHandler) newLocationHandler(w http.ResponseWriter, r *http.Request) {
+	location := persistence.Location{}
+	err := json.NewDecoder(r.Body).Decode(&location)
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "request body could not be unserialized to location: %s", err)
+		return
+	}
+
+	persistedLocation, err := eh.dbhandler.AddLocation(location)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "could not persist location: %s", err)
+	}
+
+	msg := contracts.LocationCreatedEvent{
+		ID: string(persistedLocation.ID),
+		Name: persistedLocation.Name,
+		Address: persistedLocation.Address,
+		Country: persistedLocation.Country,
+		Halls: persistedLocation.Halls,
+	}
+	eh.eventEmitter.Emit(&msg)
+
+	w.WriteHeader(201)
+	json.NewEncoder(w).Encode(&persistedLocation)
 }

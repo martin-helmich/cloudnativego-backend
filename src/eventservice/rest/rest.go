@@ -16,5 +16,10 @@ func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler, eventEmitt
 	eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.findEventHandler)
 	eventsrouter.Methods("GET").Path("").HandlerFunc(handler.allEventHandler)
 	eventsrouter.Methods("POST").Path("").HandlerFunc(handler.newEventHandler)
+
+	locationRouter := r.PathPrefix("/locations").Subrouter()
+	locationRouter.Methods("GET").Path("").HandlerFunc(handler.allLocationsHandler)
+	locationRouter.Methods("POST").Path("").HandlerFunc(handler.newLocationHandler)
+
 	return http.ListenAndServe(endpoint, r)
 }
