@@ -10,7 +10,7 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/Shopify/sarama"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/eventservice/configuration"
+	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
 	"bitbucket.org/minamartinteam/myevents/src/bookingservice/listener"
 )
 
