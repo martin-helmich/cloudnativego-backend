@@ -17,7 +17,7 @@ var (
 	KafkaMessageBrokersDefault = []string{"localhost:9092"}
 )
 
-type EventServiceConfig struct {
+type ServiceConfig struct {
 	Databasetype        dblayer.DBTYPE `json:"databasetype"`
 	DBConnection        string         `json:"dbconnection"`
 	RestfulEndpoint     string         `json:"restfulapi_endpoint"`
@@ -26,8 +26,8 @@ type EventServiceConfig struct {
 	KafkaMessageBrokers []string       `json:"kafka_message_brokers"`
 }
 
-func ExtractConfiguration(filename string) EventServiceConfig {
-	conf := EventServiceConfig{
+func ExtractConfiguration(filename string) ServiceConfig {
+	conf := ServiceConfig{
 		DBTypeDefault,
 		DBConnectionDefault,
 		RestfulEPDefault,
