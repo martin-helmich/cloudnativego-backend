@@ -3,14 +3,15 @@ package rest
 import (
 	"net/http"
 
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
 	"github.com/gorilla/mux"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"github.com/gorilla/handlers"
 )
 
 func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) error {
-
 	handler := newEventHandler(dbHandler, eventEmitter)
+
 	r := mux.NewRouter()
 	eventsrouter := r.PathPrefix("/events").Subrouter()
 	eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.findEventHandler)
@@ -21,5 +22,7 @@ func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler, eventEmitt
 	locationRouter.Methods("GET").Path("").HandlerFunc(handler.allLocationsHandler)
 	locationRouter.Methods("POST").Path("").HandlerFunc(handler.newLocationHandler)
 
-	return http.ListenAndServe(endpoint, r)
+	server := handlers.CORS()(r)
+
+	return http.ListenAndServe(endpoint, server)
 }

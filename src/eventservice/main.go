@@ -2,15 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
+	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	msgqueue_amqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"github.com/streadway/amqp"
-	"github.com/Shopify/sarama"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
+	"github.com/Shopify/sarama"
+	"github.com/streadway/amqp"
 )
 
 func main() {
@@ -47,9 +48,13 @@ func main() {
 		panic("Bad message broker type: " + config.MessageBrokerType)
 	}
 
+	fmt.Println("Connecting to database")
 	dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
 
+	fmt.Println("Serving API")
 	//RESTful API start
-	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter)
-
+	err := rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter)
+	if err != nil {
+		panic(err)
+	}
 }
