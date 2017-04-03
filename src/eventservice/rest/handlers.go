@@ -81,6 +81,27 @@ func (eh *eventServiceHandler) allEventHandler(w http.ResponseWriter, r *http.Re
 	}
 }
 
+func (eh *eventServiceHandler) oneEventHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventID, ok := vars["eventID"]
+	if !ok {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "missing route parameter 'eventID'")
+		return
+	}
+
+	eventIDBytes, _ := hex.DecodeString(eventID)
+	event, err := eh.dbhandler.FindEvent(eventIDBytes)
+	if err != nil {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, "event with id %s was not found", eventID)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf8")
+	json.NewEncoder(w).Encode(&event)
+}
+
 func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Request) {
 	event := persistence.Event{}
 	err := json.NewDecoder(r.Body).Decode(&event)
@@ -92,7 +113,7 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 	id, err := eh.dbhandler.AddEvent(event)
 	if nil != err {
 		w.WriteHeader(500)
-		fmt.Fprintf(w, "error occured while decoding event data %s", err)
+		fmt.Fprintf(w, "error occured while persisting event %s", err)
 		return
 	}
 
@@ -105,8 +126,9 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 	}
 	eh.eventEmitter.Emit(&msg)
 
-	w.WriteHeader(201)
 	w.Header().Set("Content-Type", "application/json;charset=utf8")
+
+	w.WriteHeader(201)
 	json.NewEncoder(w).Encode(&event)
 }
 
@@ -144,6 +166,8 @@ func (eh *eventServiceHandler) newLocationHandler(w http.ResponseWriter, r *http
 		Halls: persistedLocation.Halls,
 	}
 	eh.eventEmitter.Emit(&msg)
+
+	w.Header().Set("Content-Type", "application/json;charset=utf8")
 
 	w.WriteHeader(201)
 	json.NewEncoder(w).Encode(&persistedLocation)

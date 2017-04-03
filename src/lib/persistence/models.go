@@ -30,7 +30,7 @@ type Event struct {
 	Duration  int
 	StartDate int64
 	EndDate   int64
-	Location
+	Location  Location
 }
 
 type Location struct {

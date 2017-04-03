@@ -35,6 +35,11 @@ func (mgoLayer *MongoDBLayer) AddEvent(e persistence.Event) ([]byte, error) {
 	s := mgoLayer.getFreshSession()
 	defer s.Close()
 	e.ID = bson.NewObjectId()
+
+	if e.Location.ID == "" {
+		e.Location.ID = bson.NewObjectId()
+	}
+
 	return []byte(e.ID), s.DB(DB).C(EVENTS).Insert(e)
 }
 
