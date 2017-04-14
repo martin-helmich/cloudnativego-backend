@@ -35,6 +35,7 @@ func main() {
 		}
 	case "kafka":
 		conf := sarama.NewConfig()
+		conf.Producer.Return.Successes = true
 		conn, err := sarama.NewClient(config.KafkaMessageBrokers, conf)
 		if err != nil {
 			panic(err)
