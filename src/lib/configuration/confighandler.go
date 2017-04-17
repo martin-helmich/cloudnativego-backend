@@ -27,7 +27,7 @@ type ServiceConfig struct {
 	KafkaMessageBrokers []string       `json:"kafka_message_brokers"`
 }
 
-func ExtractConfiguration(filename string) ServiceConfig {
+func ExtractConfiguration(filename string) (ServiceConfig, error) {
 	conf := ServiceConfig{
 		DBTypeDefault,
 		DBConnectionDefault,
@@ -45,6 +45,10 @@ func ExtractConfiguration(filename string) ServiceConfig {
 
 	json.NewDecoder(file).Decode(&conf)
 
+	if v := os.Getenv("LISTEN_URL"); v != "" {
+		conf.RestfulEndpoint = v
+	}
+
 	if v := os.Getenv("MONGO_URL"); v != "" {
 		conf.Databasetype = "mongodb"
 		conf.DBConnection = v
@@ -58,5 +62,5 @@ func ExtractConfiguration(filename string) ServiceConfig {
 		conf.KafkaMessageBrokers = strings.Split(v, ",")
 	}
 
-	return conf
+	return conf, nil
 }
