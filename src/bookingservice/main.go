@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	//extract configuration
-	config := configuration.ExtractConfiguration(*confPath)
+	config, _ := configuration.ExtractConfiguration(*confPath)
 
 	switch config.MessageBrokerType {
 	case "amqp":
