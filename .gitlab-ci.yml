@@ -1,0 +1,12 @@
+build:eventservice:
+  image: golang:1.8.1
+  stage: build
+  before_script:
+    - mkdir -p $GOPATH/src/bitbucket.org/minamartinteam
+    - ln -nfs $PWD $GOPATH/src/bitbucket.org/minamartinteam/myevents
+    - cd $GOPATH/src/bitbucket.org/minamartinteam/myevents/src/eventservice
+  script:
+    - CGO_ENABLED=0 go build
+  artifacts:
+    paths:
+      - ./eventservice
