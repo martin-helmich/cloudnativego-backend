@@ -13,6 +13,6 @@ pipelines:
           - mkdir -pv "${PACKAGE_PATH}"
           - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
           - cd "${PACKAGE_PATH}/src/eventservice"
-          - go get ./... && go build -v
+          - go build -v
           - cd "${PACKAGE_PATH}/src/bookingservice"
-          - go get ./... && go build -v
+          - go build -v
