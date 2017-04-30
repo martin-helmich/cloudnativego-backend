@@ -1,3 +1,9 @@
+stages:
+  - build
+  - dockerbuild
+  - publish
+  - deploy
+
 build:eventservice:
   image: golang:1.8.1
   stage: build
@@ -23,3 +29,23 @@ build:bookingservice:
   artifacts:
     paths:
       - src/bookingservice/bookingservice
+
+dockerbuild:eventservice:
+  image: docker:17.04.0-ce
+  stage: dockerbuild
+  dependencies:
+    - build:eventservice
+  script:
+    - docker image build -t myevents/eventservice:$CI_COMMIT_REF_NAME src/eventservice
+  only:
+    - tags
+
+dockerbuild:bookingservice:
+  image: docker:17.04.0-ce
+  stage: dockerbuild
+  dependencies:
+    - build:bookingservice
+  script:
+    - docker image build -t myevents/bookingservice:$CI_COMMIT_REF_NAME src/bookingservice
+  only:
+    - tags
