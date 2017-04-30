@@ -9,4 +9,4 @@ build:eventservice:
     - CGO_ENABLED=0 go build
   artifacts:
     paths:
-      - ./eventservice
+      - $GOPATH/src/bitbucket.org/minamartinteam/myevents/src/eventservice/eventservice
