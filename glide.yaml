@@ -16,3 +16,5 @@ import:
 - package: gopkg.in/mgo.v2
   subpackages:
   - bson
+- package: github.com/prometheus/client_golang
+  version: ^0.8.0

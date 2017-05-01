@@ -1,5 +1,5 @@
-hash: cfc644c959ea56b69c01a37eecc13fd02759f89fde2f543fd32ff3eaa9a39902
-updated: 2017-04-29T10:41:36.131223812+02:00
+hash: 3f6d6aa4c6c75430efc67da89d8f8917139de461dae861bfb1711e208f632ae7
+updated: 2017-05-01T14:28:49.192800644+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 0dbc446aca87aebb6e0a24509b59bafc0e3ec0ae
@@ -54,6 +54,8 @@ imports:
   version: 5a004441f897722c627870a981d02b29924215fa
   subpackages:
   - xxHash32
+- name: github.com/prometheus/client_golang
+  version: c5b7fccd204277076155f10851dad72b76a49317
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
 - name: github.com/Shopify/sarama
