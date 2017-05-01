@@ -47,8 +47,7 @@ dockerbuild:bookingservice:
   dependencies:
     - build:bookingservice
   script:
-    - echo test
- #   - docker image build -t myevents/bookingservice:$CI_COMMIT_REF_NAME src/bookingservice
+    - docker image build -t myevents/bookingservice:$CI_COMMIT_REF_NAME src/bookingservice
   only:
     - tags
 
@@ -58,12 +57,11 @@ publish:
   dependencies:
     - dockerbuild:eventservice
     - dockerbuild:bookingservice
-#  before_script:
-#    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  before_script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   script:
-    - echo test
-#    - docker image push myevents/bookingservice:$CI_COMMIT_REF_NAME
-#    - docker image push myevents/eventservice:$CI_COMMIT_REF_NAME
+    - docker image push myevents/bookingservice:$CI_COMMIT_REF_NAME
+    - docker image push myevents/eventservice:$CI_COMMIT_REF_NAME
   only:
     - tags
 
@@ -71,17 +69,16 @@ deploy:
   image: alpine:3.5
   stage: deploy
   environment: production
-#  before_script:
-#    - apk add --update openssl
-#    - wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl
-#    - echo "$KUBE_CA_CERT" > ca.crt
-#    - kubectl config set-credentials gitlab-ci --token="${KUBE_TOKEN}"
-#    - kubectl config set-cluster your-cluster --server=https://your-cluster.example  --certificate-authority=ca.crt
-#    - kubectl config set-context your-cluster --cluster=your-cluster --user=gitlab-ci
-#    - kubectl config use-context your-cluster
+  before_script:
+    - apk add --update openssl
+    - wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl
+    - echo "$KUBE_CA_CERT" > ca.crt
+    - kubectl config set-credentials gitlab-ci --token="${KUBE_TOKEN}"
+    - kubectl config set-cluster your-cluster --server=https://your-cluster.example  --certificate-authority=ca.crt
+    - kubectl config set-context your-cluster --cluster=your-cluster --user=gitlab-ci
+    - kubectl config use-context your-cluster
   script:
-    - echo test
-#    - kubectl set image deployment/eventservice api=myevents/eventservice:${CI_COMMIT_REF_NAME}
-#    - kubectl set image deployment/bookingservice api=myevents/bookingservice:${CI_COMMIT_REF_NAME}
+    - kubectl set image deployment/eventservice api=myevents/eventservice:${CI_COMMIT_REF_NAME}
+    - kubectl set image deployment/bookingservice api=myevents/bookingservice:${CI_COMMIT_REF_NAME}
   only:
     - tags
