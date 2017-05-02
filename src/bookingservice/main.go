@@ -2,16 +2,19 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"net/http"
 
+	"bitbucket.org/minamartinteam/myevents/src/bookingservice/listener"
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
+	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	msgqueue_amqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"github.com/streadway/amqp"
-	"github.com/Shopify/sarama"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
-	"bitbucket.org/minamartinteam/myevents/src/bookingservice/listener"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
+	"github.com/Shopify/sarama"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/streadway/amqp"
 )
 
 func panicIfErr(err error) {
@@ -59,6 +62,14 @@ func main() {
 
 	processor := listener.EventProcessor{eventListener, dbhandler}
 	go processor.ProcessEvents()
+
+	go func() {
+		fmt.Println("Serving metrics API")
+		h := http.NewServeMux()
+		h.Handle("/metrics", promhttp.Handler())
+
+		http.ListenAndServe(":9100", h)
+	}()
 
 	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter)
 }

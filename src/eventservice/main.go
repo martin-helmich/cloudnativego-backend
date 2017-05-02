@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	"net/http"
+
 	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
 	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
@@ -11,6 +13,7 @@ import (
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
 	"github.com/Shopify/sarama"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/streadway/amqp"
 )
 
@@ -51,6 +54,14 @@ func main() {
 
 	fmt.Println("Connecting to database")
 	dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
+
+	go func() {
+		fmt.Println("Serving metrics API")
+		h := http.NewServeMux()
+		h.Handle("/metrics", promhttp.Handler())
+
+		http.ListenAndServe(":9100", h)
+	}()
 
 	fmt.Println("Serving API")
 	//RESTful API start
