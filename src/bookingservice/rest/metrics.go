@@ -6,7 +6,7 @@ var bookingCount = prometheus.NewCounterVec(prometheus.CounterOpts{
 	Name: "bookings_count",
 	Namespace: "myevents",
 	Help: "Amount of booked tickets",
-}, []string{"event"})
+}, []string{"eventID", "eventName"})
 
 var seatsPerBooking = prometheus.NewHistogram(prometheus.HistogramOpts{
 	Name: "seats_per_booking",

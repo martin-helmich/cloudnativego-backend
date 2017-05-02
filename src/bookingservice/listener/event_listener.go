@@ -38,9 +38,15 @@ func (p *EventProcessor) handleEvent(event msgqueue.Event) {
 	switch e := event.(type) {
 	case *contracts.EventCreatedEvent:
 		log.Printf("event %s created: %s", e.ID, e)
-		p.Database.AddEvent(persistence.Event{ID: bson.ObjectId(e.ID)})
+
+		if !bson.IsObjectIdHex(e.ID) {
+			log.Printf("event %v did not contain valid object ID", e)
+			return
+		}
+
+		p.Database.AddEvent(persistence.Event{ID: bson.ObjectIdHex(e.ID), Name: e.Name})
 	case *contracts.LocationCreatedEvent:
-		log.Printf("location %s created: %s", e.ID, e)
+		log.Printf("location %s created: %v", e.ID, e)
 		// TODO: No persistence for locations, yet
 	default:
 		log.Printf("unknown event type: %T", e)

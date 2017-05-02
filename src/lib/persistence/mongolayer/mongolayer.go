@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	DB     = "myevents"
-	USERS  = "users"
-	EVENTS = "events"
+	DB        = "myevents"
+	USERS     = "users"
+	EVENTS    = "events"
 	LOCATIONS = "locations"
 )
 
@@ -34,7 +34,10 @@ func (mgoLayer *MongoDBLayer) AddUser(u persistence.User) ([]byte, error) {
 func (mgoLayer *MongoDBLayer) AddEvent(e persistence.Event) ([]byte, error) {
 	s := mgoLayer.getFreshSession()
 	defer s.Close()
-	e.ID = bson.NewObjectId()
+
+	if !e.ID.Valid() {
+		e.ID = bson.NewObjectId()
+	}
 
 	if e.Location.ID == "" {
 		e.Location.ID = bson.NewObjectId()

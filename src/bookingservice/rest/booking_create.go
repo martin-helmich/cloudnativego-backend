@@ -1,12 +1,15 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
-	"io/ioutil"
 	"encoding/json"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	"github.com/nu7hatch/gouuid"
+	"time"
 	"bitbucket.org/minamartinteam/myevents/src/contracts"
+	"github.com/gorilla/mux"
+	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
+	"encoding/hex"
 )
 
 type eventRef struct {
@@ -15,7 +18,6 @@ type eventRef struct {
 }
 
 type createBookingRequest struct {
-	Event eventRef `json:"event"`
 	Seats int `json:"seats"`
 }
 
@@ -26,47 +28,63 @@ type createBookingResponse struct {
 
 type CreateBookingHandler struct{
 	eventEmitter msgqueue.EventEmitter
+	database persistence.DatabaseHandler
 }
 
-func (h *CreateBookingHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	defer req.Body.Close()
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil{
-		respondWithError(res, "could not read request body", 400)
+func (h *CreateBookingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	routeVars := mux.Vars(r)
+	eventID, ok := routeVars["eventID"]
+	if !ok {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "missing route parameter 'eventID'")
 		return
 	}
 
-	request := createBookingRequest{}
-	err = json.Unmarshal(body, &request)
+	eventIDMongo, _ := hex.DecodeString(eventID)
+	event, err := h.database.FindEvent(eventIDMongo)
 	if err != nil {
-		respondWithError(res, "could not unserialize body", 400)
+		w.WriteHeader(404)
+		fmt.Fprintf(w, "event %s could not be loaded: %s", eventID, err)
 		return
 	}
 
-	bookingID, _ := uuid.NewV4()
-	response := createBookingResponse{
-		ID: bookingID.String(),
-		Event: request.Event,
-	}
-
-	go func() {
-		h.eventEmitter.Emit(&contracts.EventBookedEvent{
-			EventID: request.Event.ID,
-			UserID: "foo", // TODO: Authenticate user
-		})
-	}()
-
-	bookingCount.WithLabelValues(request.Event.ID).Inc()
-	seatsPerBooking.Observe(float64(request.Seats))
-
-	responseBody, err := json.Marshal(&response)
+	bookingRequest := createBookingRequest{}
+	err = json.NewDecoder(r.Body).Decode(&bookingRequest)
 	if err != nil {
-		respondWithError(res, "could not serialize response", 500)
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "could not decode JSON body: %s", err)
 		return
 	}
 
-	res.WriteHeader(201)
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(responseBody)
+	if bookingRequest.Seats <= 0 {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "seat number must be positive (was %d)", bookingRequest.Seats)
+		return
+	}
+
+	eventIDAsBytes, _ := event.ID.MarshalText()
+	booking := persistence.Booking{
+		Date:    time.Now().Unix(),
+		EventID: eventIDAsBytes,
+		Seats:   bookingRequest.Seats,
+	}
+
+	msg := contracts.EventBookedEvent{
+		EventID: event.ID.Hex(),
+		UserID:  "someUserID",
+	}
+	h.eventEmitter.Emit(&msg)
+
+	bookingCount.
+		WithLabelValues(eventID, event.Name).
+		Add(float64(bookingRequest.Seats))
+	seatsPerBooking.
+		Observe(float64(bookingRequest.Seats))
+
+	h.database.AddBookingForUser([]byte("someUserID"), booking)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	json.NewEncoder(w).Encode(&booking)
 }

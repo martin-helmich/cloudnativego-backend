@@ -101,8 +101,6 @@ func (l *amqpEventListener) Listen(eventNames ...string) (<-chan msgqueue.Event,
 		return nil, nil, err
 	}
 
-	defer channel.Close()
-
 	// Create binding between queue and exchange for each listened event type
 	for _, event := range eventNames {
 		if err := channel.QueueBind(l.queue, event, l.exchange, false, nil); err != nil {

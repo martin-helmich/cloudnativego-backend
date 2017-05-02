@@ -2,7 +2,6 @@ package rest
 
 import (
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,7 +12,7 @@ import (
 func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) {
 	r := mux.NewRouter()
 	r.Methods("get").Path("/events/{eventID}/bookings").Handler(&ListBookingHandler{})
-	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{})
+	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{eventEmitter, database})
 
 	srv := http.Server{
 		Handler:      r,

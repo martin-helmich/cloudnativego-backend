@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"bitbucket.org/minamartinteam/myevents/src/bookingservice/listener"
-	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
+	"bitbucket.org/minamartinteam/myevents/src/bookingservice/rest"
 	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
 	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	msgqueue_amqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
