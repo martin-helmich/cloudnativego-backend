@@ -16,6 +16,7 @@ type eventRef struct {
 
 type createBookingRequest struct {
 	Event eventRef `json:"event"`
+	Seats int `json:"seats"`
 }
 
 type createBookingResponse struct {
@@ -55,6 +56,9 @@ func (h *CreateBookingHandler) ServeHTTP(res http.ResponseWriter, req *http.Requ
 			UserID: "foo", // TODO: Authenticate user
 		})
 	}()
+
+	bookingCount.WithLabelValues(request.Event.ID).Inc()
+	seatsPerBooking.Observe(float64(request.Seats))
 
 	responseBody, err := json.Marshal(&response)
 	if err != nil {
