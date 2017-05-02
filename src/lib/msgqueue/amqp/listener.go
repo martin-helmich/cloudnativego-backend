@@ -1,12 +1,13 @@
 package amqp
 
 import (
-	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"fmt"
-	"github.com/streadway/amqp"
 	"os"
 	"time"
+
+	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
+	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"github.com/streadway/amqp"
 )
 
 const eventNameHeader = "x-event-name"
@@ -58,6 +59,11 @@ func NewAMQPEventListener(conn *amqp.Connection, exchange string, queue string) 
 		exchange:   exchange,
 		queue:      queue,
 		mapper:     msgqueue.NewEventMapper(),
+	}
+
+	err := listener.setup()
+	if err != nil {
+		return nil, err
 	}
 
 	return &listener, nil
