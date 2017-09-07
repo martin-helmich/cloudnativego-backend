@@ -6,13 +6,14 @@ import (
 
 	"net/http"
 
-	"bitbucket.org/minamartinteam/myevents/src/eventservice/rest"
-	"bitbucket.org/minamartinteam/myevents/src/lib/configuration"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	msgqueue_amqp "bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
 	"github.com/Shopify/sarama"
+
+	"github.com/minamartinteam/cloudnativego-backend/src/eventservice/rest"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/configuration"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	msgqueue_amqp "github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue/amqp"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue/kafka"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence/dblayer"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/streadway/amqp"
 )

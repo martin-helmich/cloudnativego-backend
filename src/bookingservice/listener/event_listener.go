@@ -1,12 +1,13 @@
 package listener
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/contracts"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
-	"gopkg.in/mgo.v2/bson"
 	"fmt"
 	"log"
+
+	"github.com/minamartinteam/cloudnativego-backend/src/contracts"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type EventProcessor struct {

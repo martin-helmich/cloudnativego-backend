@@ -1,13 +1,14 @@
 package amqp
 
 import (
-	amqphelper "bitbucket.org/minamartinteam/myevents/src/lib/helper/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"encoding/json"
 	"fmt"
-	"github.com/streadway/amqp"
 	"os"
 	"time"
+
+	amqphelper "github.com/minamartinteam/cloudnativego-backend/src/lib/helper/amqp"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/streadway/amqp"
 )
 
 type amqpEventEmitter struct {

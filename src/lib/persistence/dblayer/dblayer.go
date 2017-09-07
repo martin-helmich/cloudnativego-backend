@@ -1,8 +1,8 @@
 package dblayer
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/mongolayer"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence/mongolayer"
 )
 
 type DBTYPE string

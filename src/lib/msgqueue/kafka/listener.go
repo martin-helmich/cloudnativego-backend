@@ -1,16 +1,17 @@
 package kafka
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
+	"encoding/json"
 	"fmt"
-	"github.com/Shopify/sarama"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
-	"encoding/json"
+
+	"github.com/Shopify/sarama"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/helper/kafka"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
 )
 
 type kafkaEventListener struct {

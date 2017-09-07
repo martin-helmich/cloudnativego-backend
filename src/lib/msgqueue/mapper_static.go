@@ -1,13 +1,14 @@
 package msgqueue
 
 import (
-	"fmt"
 	"encoding/json"
-	"bitbucket.org/minamartinteam/myevents/src/contracts"
+	"fmt"
+
+	"github.com/minamartinteam/cloudnativego-backend/src/contracts"
 	"github.com/mitchellh/mapstructure"
 )
 
-type StaticEventMapper struct {}
+type StaticEventMapper struct{}
 
 func (e *StaticEventMapper) MapEvent(eventName string, serialized interface{}) (Event, error) {
 	var event Event
@@ -31,7 +32,7 @@ func (e *StaticEventMapper) MapEvent(eventName string, serialized interface{}) (
 		}
 	default:
 		cfg := mapstructure.DecoderConfig{
-			Result: event,
+			Result:  event,
 			TagName: "json",
 		}
 		dec, err := mapstructure.NewDecoder(&cfg)

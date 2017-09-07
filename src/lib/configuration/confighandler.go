@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"os"
 
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence/dblayer"
-	"strings"
 	"fmt"
+	"strings"
+
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence/dblayer"
 )
 
 var (

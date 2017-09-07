@@ -1,8 +1,8 @@
 package dynamolayer
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
 )
 
 const (

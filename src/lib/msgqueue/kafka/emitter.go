@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/minamartinteam/myevents/src/lib/helper/kafka"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"github.com/Shopify/sarama"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/helper/kafka"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
 )
 
 type kafkaEventEmitter struct {
@@ -17,8 +17,8 @@ type kafkaEventEmitter struct {
 }
 
 type messageEnvelope struct {
-	EventName string `json:"eventName"`
-	Payload interface{} `json:"payload"`
+	EventName string      `json:"eventName"`
+	Payload   interface{} `json:"payload"`
 }
 
 func NewKafkaEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {

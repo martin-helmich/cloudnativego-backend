@@ -3,7 +3,7 @@ package rest
 import (
 	"net/http"
 
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
 
 	"fmt"
 
@@ -12,20 +12,21 @@ import (
 
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	"bitbucket.org/minamartinteam/myevents/src/contracts"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/minamartinteam/cloudnativego-backend/src/contracts"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
 )
 
 type eventServiceHandler struct {
-	dbhandler persistence.DatabaseHandler
+	dbhandler    persistence.DatabaseHandler
 	eventEmitter msgqueue.EventEmitter
 }
 
 func newEventHandler(databasehandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) *eventServiceHandler {
 	return &eventServiceHandler{
-		dbhandler: databasehandler,
+		dbhandler:    databasehandler,
 		eventEmitter: eventEmitter,
 	}
 }
@@ -118,10 +119,10 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	msg := contracts.EventCreatedEvent{
-		ID: hex.EncodeToString(id),
-		Name: event.Name,
-		Start: time.Unix(event.StartDate, 0),
-		End: time.Unix(event.EndDate, 0),
+		ID:         hex.EncodeToString(id),
+		Name:       event.Name,
+		Start:      time.Unix(event.StartDate, 0),
+		End:        time.Unix(event.EndDate, 0),
 		LocationID: string(event.Location.ID),
 	}
 	eh.eventEmitter.Emit(&msg)
@@ -159,11 +160,11 @@ func (eh *eventServiceHandler) newLocationHandler(w http.ResponseWriter, r *http
 	}
 
 	msg := contracts.LocationCreatedEvent{
-		ID: string(persistedLocation.ID),
-		Name: persistedLocation.Name,
+		ID:      string(persistedLocation.ID),
+		Name:    persistedLocation.Name,
 		Address: persistedLocation.Address,
 		Country: persistedLocation.Country,
-		Halls: persistedLocation.Halls,
+		Halls:   persistedLocation.Halls,
 	}
 	eh.eventEmitter.Emit(&msg)
 

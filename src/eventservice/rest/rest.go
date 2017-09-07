@@ -3,10 +3,10 @@ package rest
 import (
 	"net/http"
 
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
 )
 
 func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) error {

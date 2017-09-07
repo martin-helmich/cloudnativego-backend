@@ -1,19 +1,20 @@
 package rest
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
 	"time"
-	"bitbucket.org/minamartinteam/myevents/src/contracts"
+
 	"github.com/gorilla/mux"
-	"bitbucket.org/minamartinteam/myevents/src/lib/persistence"
-	"encoding/hex"
+	"github.com/minamartinteam/cloudnativego-backend/src/contracts"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
 )
 
 type eventRef struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name,omitempty"`
 }
 
@@ -22,13 +23,13 @@ type createBookingRequest struct {
 }
 
 type createBookingResponse struct {
-	ID string `json:"id"`
+	ID    string   `json:"id"`
 	Event eventRef `json:"event"`
 }
 
-type CreateBookingHandler struct{
+type CreateBookingHandler struct {
 	eventEmitter msgqueue.EventEmitter
-	database persistence.DatabaseHandler
+	database     persistence.DatabaseHandler
 }
 
 func (h *CreateBookingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

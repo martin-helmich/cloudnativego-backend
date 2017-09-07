@@ -1,12 +1,13 @@
 package builder
 
 import (
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/amqp"
-	"bitbucket.org/minamartinteam/myevents/src/lib/msgqueue/kafka"
 	"errors"
 	"log"
 	"os"
+
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue/amqp"
+	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue/kafka"
 )
 
 func NewEventListenerFromEnvironment() (msgqueue.EventListener, error) {
