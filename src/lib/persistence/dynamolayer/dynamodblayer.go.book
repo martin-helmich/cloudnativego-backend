@@ -10,11 +10,6 @@ import (
 	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
 )
 
-const (
-	USERS  = "users"
-	EVENTS = "events"
-)
-
 type DynamoDBLayer struct {
 	service *dynamodb.DynamoDB
 }
@@ -37,21 +32,6 @@ func NewDynamoDBLayerBySession(sess *session.Session) persistence.DatabaseHandle
 	}
 }
 
-func (dynamoLayer *DynamoDBLayer) AddUser(user persistence.User) ([]byte, error) {
-	av, err := dynamodbattribute.MarshalMap(user)
-	if err != nil {
-		return nil, err
-	}
-	_, err = dynamoLayer.service.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String(USERS),
-		Item:      av,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return []byte(user.ID), nil
-}
-
 func (dynamoLayer *DynamoDBLayer) AddEvent(event persistence.Event) ([]byte, error) {
 	av, err := dynamodbattribute.MarshalMap(event)
 	if err != nil {
@@ -65,64 +45,6 @@ func (dynamoLayer *DynamoDBLayer) AddEvent(event persistence.Event) ([]byte, err
 		return nil, err
 	}
 	return []byte(event.ID), nil
-}
-
-func (dynamoLayer *DynamoDBLayer) AddBookingForUser(id []byte, bk persistence.Booking) error {
-	/*
-		input := &dynamodb.UpdateItemInput{
-			ExpressionAttributeNames: map[string]*string{
-
-			}
-		}
-		av,err := dynamodbattribute.MarshalMap(bk)
-	*/
-	booking := []persistence.Booking{bk}
-	bookingMardhalled, err := dynamodbattribute.Marshal(&booking)
-	if err != nil {
-		return err
-	}
-	input := &dynamodb.UpdateItemInput{
-		UpdateExpression: aws.String("SET #B = list_append(:i, #B)"),
-		ExpressionAttributeNames: map[string]*string{
-			"#B": aws.String("Bookings"),
-		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":i": bookingMardhalled,
-		},
-		ReturnValues: aws.String("UPDATED_NEW"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"ID": {
-				B: id,
-			},
-		},
-		TableName: aws.String("users"),
-	}
-	_, err = dynamoLayer.service.UpdateItem(input)
-	return err
-}
-
-func (dynamoLayer *DynamoDBLayer) FindUser(f string, l string) (persistence.User, error) {
-
-	return persistence.User{}, nil
-}
-
-func (dynamoLayer *DynamoDBLayer) FindBookingsForUser(id []byte) ([]persistence.Booking, error) {
-	input := &dynamodb.GetItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"ID": {
-				B: id,
-			},
-		},
-		TableName: aws.String("users"),
-	}
-	result, err := dynamoLayer.service.GetItem(input)
-	if err != nil {
-		return nil, err
-	}
-	av := result.Item["Bookings"]
-	bookings := []persistence.Booking{}
-	err = dynamodbattribute.Unmarshal(av, &bookings)
-	return bookings, err
 }
 
 func (dynamoLayer *DynamoDBLayer) FindEvent(id []byte) (persistence.Event, error) {
@@ -187,16 +109,4 @@ func (dynamoLayer *DynamoDBLayer) FindAllAvailableEvents() ([]persistence.Event,
 	events := []persistence.Event{}
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &events)
 	return events, err
-}
-
-func (dynamoLayer *DynamoDBLayer) AddLocation(l persistence.Location) (persistence.Location, error) {
-	return persistence.Location{}, nil
-}
-
-func (dynamoLayer *DynamoDBLayer) FindLocation(s string) (persistence.Location, error) {
-	return persistence.Location{}, nil
-}
-
-func (dynamoLayer *DynamoDBLayer) FindAllLocations() ([]persistence.Location, error) {
-	return nil, nil
 }

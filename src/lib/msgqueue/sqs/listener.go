@@ -71,6 +71,7 @@ func (sqsListener *SQSListener) receiveMessage(eventCh chan msgqueue.Event, erro
 	})
 	if err != nil {
 		errorCh <- err
+		return
 	}
 
 	bContinue := false
