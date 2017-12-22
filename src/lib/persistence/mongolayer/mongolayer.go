@@ -1,7 +1,7 @@
 package mongolayer
 
 import (
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/persistence"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

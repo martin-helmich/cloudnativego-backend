@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/persistence"
 )
 
 func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) {

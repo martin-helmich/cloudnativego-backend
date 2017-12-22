@@ -3,9 +3,10 @@ package msgqueue
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"github.com/mitchellh/mapstructure"
+	"reflect"
 )
+
 type DynamicEventMapper struct {
 	typeMap map[string]reflect.Type
 }
@@ -38,7 +39,7 @@ func (e *DynamicEventMapper) MapEvent(eventName string, serialized interface{}) 
 		}
 	default:
 		cfg := mapstructure.DecoderConfig{
-			Result: event,
+			Result:  event,
 			TagName: "json",
 		}
 		dec, err := mapstructure.NewDecoder(&cfg)

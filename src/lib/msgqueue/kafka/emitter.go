@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/helper/kafka"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/helper/kafka"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue"
 )
 
 type kafkaEventEmitter struct {

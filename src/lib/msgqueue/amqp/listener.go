@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	amqphelper "github.com/minamartinteam/cloudnativego-backend/src/lib/helper/amqp"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	amqphelper "github.com/martin-helmich/cloudnativego-backend/src/lib/helper/amqp"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue"
 	"github.com/streadway/amqp"
 )
 

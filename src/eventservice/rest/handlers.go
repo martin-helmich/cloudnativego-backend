@@ -1,22 +1,16 @@
 package rest
 
 import (
-	"net/http"
-
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence"
-
-	"fmt"
-
 	"encoding/hex"
-	"strings"
-
 	"encoding/json"
-
-	"time"
-
+	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/minamartinteam/cloudnativego-backend/src/contracts"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/martin-helmich/cloudnativego-backend/src/contracts"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/persistence"
+	"net/http"
+	"strings"
+	"time"
 )
 
 type eventServiceHandler struct {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/minamartinteam/cloudnativego-backend/src/contracts"
+	"github.com/martin-helmich/cloudnativego-backend/src/contracts"
 	"github.com/mitchellh/mapstructure"
 )
 

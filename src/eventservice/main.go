@@ -8,12 +8,12 @@ import (
 
 	"github.com/Shopify/sarama"
 
-	"github.com/minamartinteam/cloudnativego-backend/src/eventservice/rest"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/configuration"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue"
-	msgqueue_amqp "github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue/amqp"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/msgqueue/kafka"
-	"github.com/minamartinteam/cloudnativego-backend/src/lib/persistence/dblayer"
+	"github.com/martin-helmich/cloudnativego-backend/src/eventservice/rest"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/configuration"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue"
+	msgqueue_amqp "github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue/amqp"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/msgqueue/kafka"
+	"github.com/martin-helmich/cloudnativego-backend/src/lib/persistence/dblayer"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/streadway/amqp"
 )
